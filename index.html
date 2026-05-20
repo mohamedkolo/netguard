@@ -5,591 +5,216 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NetGuard - حارس النت</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { cairo: ['Cairo', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root {
-            --bg: #060a13;
-            --card: #0d1829;
-            --card2: #111f35;
-            --border: #152040;
-            --accent: #00e676;
-            --danger: #ff5252;
-            --warn: #ffab40;
-            --info: #40c4ff;
-            --text: #e0e8f0;
-            --muted: #5a7090;
-        }
+        :root { --bg: #060a13; --card: #0d1829; --card2: #111f35; --border: #152040; --accent: #00e676; --danger: #ff5252; --warn: #ffab40; --info: #40c4ff; --text: #e0e8f0; --muted: #5a7090; }
         * { font-family: 'Cairo', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-        .grid-bg {
-            background-image:
-                linear-gradient(rgba(0,230,118,0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,230,118,0.025) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-
+        .grid-bg { background-image: linear-gradient(rgba(0,230,118,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.025) 1px, transparent 1px); background-size: 50px 50px; }
         @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.8)} }
         .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-
         @keyframes progress-flow { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-        .progress-anim {
-            background: linear-gradient(90deg, var(--accent), #00c853, var(--accent));
-            background-size: 200% 100%;
-            animation: progress-flow 2s linear infinite;
-        }
-
-        @keyframes slide-in-rtl { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
-        @keyframes slide-out-rtl { from{transform:translateX(0);opacity:1} to{transform:translateX(120%);opacity:0} }
-        .toast-in { animation: slide-in-rtl .4s ease-out; }
-        .toast-out { animation: slide-out-rtl .4s ease-in forwards; }
-
-        @keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        .fade-up { animation: fade-up .5s ease-out forwards; }
-
-        @keyframes scan-line { 0%{top:-2px} 100%{top:100%} }
-        .scan-line::after {
-            content:''; position:absolute; left:0; right:0; height:2px;
-            background:linear-gradient(90deg,transparent,var(--accent),transparent);
-            animation: scan-line 3s linear infinite; opacity:.3;
-        }
-
-        .stat-card {
-            background: var(--card); border:1px solid var(--border); border-radius:16px;
-            padding:20px; position:relative; overflow:hidden; transition: all .3s;
-        }
-        .stat-card:hover { border-color: rgba(0,230,118,.3); transform:translateY(-2px); }
-        .stat-card .glow {
-            position:absolute; top:-20px; left:-20px; width:80px; height:80px;
-            border-radius:50%; filter:blur(40px); opacity:.15;
-        }
-
-        .device-card {
-            background: var(--card); border:1px solid var(--border); border-radius:16px;
-            padding:20px; transition: all .3s; position:relative; overflow:hidden;
-        }
-        .device-card:hover { background:var(--card2); border-color:rgba(0,230,118,.25); transform:translateY(-1px); }
+        .progress-anim { background: linear-gradient(90deg, var(--accent), #00c853, var(--accent)); background-size: 200% 100%; animation: progress-flow 2s linear infinite; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: all .3s; }
+        .stat-card:hover { border-color: rgba(0,230,118,.3); transform: translateY(-2px); }
+        .device-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: all .3s; position: relative; overflow: hidden; }
+        .device-card:hover { background: var(--card2); border-color: rgba(0,230,118,.25); transform: translateY(-1px); }
         .device-card.unknown { border-color: rgba(255,171,64,.5); }
-        .device-card.unknown::before {
-            content:''; position:absolute; top:0; right:0; left:0; height:3px;
-            background: linear-gradient(90deg, var(--warn), var(--danger));
-        }
-        .device-card.blocked { opacity:.5; }
-
-        .tab-btn { padding:12px 20px; color:var(--muted); border-bottom:2px solid transparent; transition:all .3s; cursor:pointer; }
-        .tab-btn:hover { color:var(--text); }
-        .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
-
-        .modal-overlay {
-            position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(8px);
-            z-index:100; display:flex; align-items:center; justify-content:center;
-            opacity:0; pointer-events:none; transition:opacity .3s;
-        }
-        .modal-overlay.show { opacity:1; pointer-events:all; }
-        .modal-box {
-            background:var(--card); border:1px solid var(--border); border-radius:20px;
-            padding:28px; max-width:480px; width:92%; transform:translateY(30px); transition:transform .3s;
-        }
-        .modal-overlay.show .modal-box { transform:translateY(0); }
-
-        .btn-accent {
-            background:var(--accent); color:#060a13; font-weight:700; padding:10px 24px;
-            border-radius:12px; border:none; cursor:pointer; transition:all .3s;
-        }
-        .btn-accent:hover { box-shadow:0 0 25px rgba(0,230,118,.4); transform:translateY(-1px); }
-        .btn-danger { background:var(--danger); color:#fff; font-weight:700; padding:10px 24px; border-radius:12px; border:none; cursor:pointer; }
-        .btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); padding:10px 24px; border-radius:12px; cursor:pointer; transition:all .3s; }
-        .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
-
-        input[type="range"] {
-            -webkit-appearance:none; width:100%; height:6px; border-radius:3px;
-            background:var(--border); outline:none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
-            background:var(--accent); cursor:pointer; box-shadow:0 0 8px rgba(0,230,118,.4);
-        }
-        input[type="number"], input[type="text"], select {
-            background:var(--bg); border:1px solid var(--border); color:var(--text);
-            padding:8px 14px; border-radius:10px; outline:none; transition:border .3s;
-        }
-        input:focus, select:focus { border-color:var(--accent); }
-
-        .verdict-card { border-radius:20px; padding:32px; text-align:center; position:relative; overflow:hidden; }
-        .verdict-card.safe { background: linear-gradient(135deg, #0a2e1a, #0d1829); border:1px solid rgba(0,230,118,.3); }
-        .verdict-card.warning { background: linear-gradient(135deg, #2e2a0a, #0d1829); border:1px solid rgba(255,171,64,.3); }
-        .verdict-card.danger { background: linear-gradient(135deg, #2e0a0a, #0d1829); border:1px solid rgba(255,82,82,.3); }
-
-        ::-webkit-scrollbar { width:5px; }
-        ::-webkit-scrollbar-track { background:var(--bg); }
-        ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-
-        @media (max-width:768px) {
-            .stat-grid { grid-template-columns: 1fr 1fr !important; }
-            .device-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width:480px) {
-            .stat-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; }
-        }
+        .device-card.unknown::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--warn), var(--danger)); }
+        .tab-btn { padding: 12px 20px; color: var(--muted); border-bottom: 2px solid transparent; transition: all .3s; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; font-weight: 600; font-size: 14px; }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .btn-accent { background: var(--accent); color: #060a13; font-weight: 700; padding: 10px 24px; border-radius: 12px; border: none; cursor: pointer; transition: all .3s; }
+        .btn-accent:hover { box-shadow: 0 0 25px rgba(0,230,118,.4); }
+        .btn-danger { background: var(--danger); color: #fff; font-weight: 700; padding: 10px 24px; border-radius: 12px; border: none; cursor: pointer; }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 10px 24px; border-radius: 12px; cursor: pointer; transition: all .3s; }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+        input[type="number"], input[type="text"], select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 10px; outline: none; transition: border .3s; width: 100%; }
+        input:focus, select:focus { border-color: var(--accent); }
+        .verdict-card { border-radius: 20px; padding: 32px; text-align: center; position: relative; overflow: hidden; }
+        .verdict-card.safe { background: linear-gradient(135deg, #0a2e1a, #0d1829); border: 1px solid rgba(0,230,118,.3); }
+        .verdict-card.warning { background: linear-gradient(135deg, #2e2a0a, #0d1829); border: 1px solid rgba(255,171,64,.3); }
+        .verdict-card.danger { background: linear-gradient(135deg, #2e0a0a, #0d1829); border: 1px solid rgba(255,82,82,.3); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 480px; width: 92%; transform: translateY(30px); transition: transform .3s; }
+        .modal-overlay.show .modal-box { transform: translateY(0); }
+        @media (max-width: 768px) { .stat-grid { grid-template-columns: 1fr 1fr !important; } .device-grid { grid-template-columns: 1fr !important; } .chart-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 480px) { .stat-grid { grid-template-columns: 1fr !important; } }
     </style>
 </head>
 <body class="grid-bg">
 
-    <!-- الهيدر -->
     <header class="sticky top-0 z-50" style="background:rgba(6,10,19,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)">
         <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent)">
-                    <i class="fa-solid fa-shield-halved text-lg" style="color:var(--bg)"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold leading-tight" style="color:var(--accent)">NetGuard</h1>
-                    <p class="text-xs" style="color:var(--muted)">حارس النت</p>
-                </div>
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent)"><i class="fa-solid fa-shield-halved text-lg" style="color:var(--bg)"></i></div>
+                <div><h1 class="text-lg font-bold leading-tight" style="color:var(--accent)">NetGuard</h1><p class="text-xs" style="color:var(--muted)">حارس النت</p></div>
             </div>
-            <div class="flex items-center gap-4">
-                <!-- زر الإشعارات -->
-                <button onclick="toggleNotifPanel()" class="relative w-10 h-10 rounded-xl flex items-center justify-center transition hover:bg-white/5" style="border:1px solid var(--border)">
-                    <i class="fa-solid fa-bell" style="color:var(--muted)"></i>
-                    <span id="notif-badge" class="absolute -top-1 -left-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center hidden" style="background:var(--danger);color:#fff">0</span>
-                </button>
-                <!-- حالة الاتصال -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)">
-                    <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent)"></span>
-                    <span class="text-xs font-semibold" style="color:var(--accent)">متصل</span>
-                </div>
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)">
+                <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent)"></span>
+                <span class="text-xs font-semibold" style="color:var(--accent)">متصل</span>
             </div>
         </div>
     </header>
 
-    <!-- التبويبات -->
     <nav class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto" style="border-bottom:1px solid var(--border)">
-        <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
-            <i class="fa-solid fa-chart-line ml-2"></i>لوحة التحكم
-        </button>
-        <button class="tab-btn" data-tab="devices" onclick="switchTab('devices')">
-            <i class="fa-solid fa-devices ml-2"></i>الأجهزة
-        </button>
-        <button class="tab-btn" data-tab="theft" onclick="switchTab('theft')">
-            <i class="fa-solid fa-magnifying-glass-chart ml-2"></i>كشف السرقة
-        </button>
+        <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-line ml-2"></i>لوحة التحكم</button>
+        <button class="tab-btn" data-tab="devices" onclick="switchTab('devices')"><i class="fa-solid fa-wifi ml-2"></i>الأجهزة</button>
+        <button class="tab-btn" data-tab="theft" onclick="switchTab('theft')"><i class="fa-solid fa-magnifying-glass-chart ml-2"></i>كشف السرقة</button>
     </nav>
 
-    <!-- المحتوى الرئيسي -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- ======= لوحة التحكم ======= -->
         <section id="sec-dashboard">
-            <!-- بطاقات الإحصائيات -->
-            <div class="stat-grid grid grid-cols-4 gap-4 mb-6" style="grid-template-columns: repeat(4, 1fr)">
-                <div class="stat-card">
-                    <div class="glow" style="background:var(--accent)"></div>
-                    <p class="text-xs mb-1" style="color:var(--muted)">إجمالي الاستهلاك اليومي</p>
-                    <p class="text-2xl font-black" id="stat-total-usage">12.8</p>
-                    <p class="text-xs" style="color:var(--muted)">جيجابايت من 50 جيجا</p>
-                    <div class="w-full h-1.5 rounded-full mt-3" style="background:var(--border)">
-                        <div class="h-full rounded-full progress-anim" style="width:25.6%"></div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="glow" style="background:var(--info)"></div>
-                    <p class="text-xs mb-1" style="color:var(--muted)">السرعة الحالية</p>
-                    <p class="text-2xl font-black" id="stat-speed">72.4</p>
-                    <p class="text-xs" style="color:var(--muted)">ميجابت/ثانية</p>
-                    <div class="flex items-center gap-1 mt-3">
-                        <i class="fa-solid fa-arrow-up text-xs" style="color:var(--accent)"></i>
-                        <span class="text-xs" style="color:var(--accent)">مستقرة</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="glow" style="background:var(--warn)"></div>
-                    <p class="text-xs mb-1" style="color:var(--muted)">أجهزة متصلة</p>
-                    <p class="text-2xl font-black" id="stat-devices">5</p>
-                    <p class="text-xs" style="color:var(--muted)">جهاز على الشبكة</p>
-                    <div class="flex items-center gap-1 mt-3">
-                        <span class="text-xs" style="color:var(--warn)" id="stat-unknown">1 مجهول</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="glow" style="background:var(--danger)"></div>
-                    <p class="text-xs mb-1" style="color:var(--muted)">تنبيهات أمنية</p>
-                    <p class="text-2xl font-black" id="stat-alerts">2</p>
-                    <p class="text-xs" style="color:var(--muted)">تحتاج مراجعة</p>
-                    <div class="flex items-center gap-1 mt-3">
-                        <i class="fa-solid fa-triangle-exclamation text-xs" style="color:var(--danger)"></i>
-                        <span class="text-xs" style="color:var(--danger)">تحقق فوراً</span>
-                    </div>
-                </div>
+            <div class="stat-grid grid grid-cols-4 gap-4 mb-6">
+                <div class="stat-card"><div class="glow" style="background:var(--accent)"></div><p class="text-xs mb-1" style="color:var(--muted)">إجمالي الاستهلاك اليومي</p><p class="text-2xl font-black" id="stat-total-usage">12.8</p><p class="text-xs" style="color:var(--muted)">جيجابايت من 50 جيجا</p><div class="w-full h-1.5 rounded-full mt-3" style="background:var(--border)"><div class="h-full rounded-full progress-anim" style="width:25.6%"></div></div></div>
+                <div class="stat-card"><div class="glow" style="background:var(--info)"></div><p class="text-xs mb-1" style="color:var(--muted)">السرعة الحالية</p><p class="text-2xl font-black" id="stat-speed">72.4</p><p class="text-xs" style="color:var(--muted)">ميجابت/ثانية</p></div>
+                <div class="stat-card"><div class="glow" style="background:var(--warn)"></div><p class="text-xs mb-1" style="color:var(--muted)">أجهزة متصلة</p><p class="text-2xl font-black" id="stat-devices">5</p><p class="text-xs" style="color:var(--warn)" id="stat-unknown">1 مجهول</p></div>
+                <div class="stat-card"><div class="glow" style="background:var(--danger)"></div><p class="text-xs mb-1" style="color:var(--muted)">تنبيهات أمنية</p><p class="text-2xl font-black" id="stat-alerts">2</p><p class="text-xs" style="color:var(--danger)">تحقق فوراً</p></div>
             </div>
-
-            <!-- الرسم البياني المباشر -->
-            <div class="grid gap-4 mb-6" style="grid-template-columns: 2fr 1fr">
-                <div class="stat-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold">مراقبة النطاق المباشر</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent)"></span>
-                            <span class="text-xs" style="color:var(--accent)">مباشر</span>
-                        </div>
-                    </div>
-                    <canvas id="liveChart" height="200"></canvas>
-                </div>
-                <div class="stat-card">
-                    <h3 class="font-bold mb-4">استهلاك الأجهزة</h3>
-                    <canvas id="pieChart" height="200"></canvas>
-                </div>
+            <div class="chart-grid grid gap-4 mb-6" style="grid-template-columns: 2fr 1fr">
+                <div class="stat-card"><h3 class="font-bold mb-2">مراقبة النطاق المباشر</h3><canvas id="liveChart" height="150"></canvas></div>
+                <div class="stat-card"><h3 class="font-bold mb-2">استهلاك الأجهزة</h3><canvas id="pieChart" height="150"></canvas></div>
             </div>
-
-            <!-- ملخص الأجهزة -->
             <div class="stat-card">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold">أحدث الأجهزة النشطة</h3>
-                    <button onclick="switchTab('devices')" class="text-xs font-semibold" style="color:var(--accent);background:none;border:none;cursor:pointer">
-                        عرض الكل <i class="fa-solid fa-arrow-left mr-1"></i>
-                    </button>
-                </div>
+                <h3 class="font-bold mb-4">أحدث الأجهزة النشطة</h3>
                 <div id="dashboard-devices" class="space-y-3"></div>
             </div>
         </section>
 
-        <!-- ======= الأجهزة ======= -->
         <section id="sec-devices" class="hidden">
-            <!-- فلاتر -->
             <div class="flex items-center gap-3 mb-5 flex-wrap">
-                <button class="filter-btn btn-accent text-sm" data-filter="all" onclick="filterDevices('all')">الكل</button>
-                <button class="filter-btn btn-ghost text-sm" data-filter="known" onclick="filterDevices('known')">معروف</button>
-                <button class="filter-btn btn-ghost text-sm" data-filter="unknown" onclick="filterDevices('unknown')">مجهول</button>
-                <button class="filter-btn btn-ghost text-sm" data-filter="blocked" onclick="filterDevices('blocked')">محظور</button>
-                <div class="flex-1"></div>
-                <button onclick="simulateNewDevice()" class="btn-ghost text-sm">
-                    <i class="fa-solid fa-rotate ml-1"></i>فحص الشبكة
-                </button>
+                <button class="filter-btn btn-accent text-sm" onclick="filterDevices('all')">الكل</button>
+                <button class="filter-btn btn-ghost text-sm" onclick="filterDevices('known')">معروف</button>
+                <button class="filter-btn btn-ghost text-sm" onclick="filterDevices('unknown')">مجهول</button>
             </div>
-            <!-- شبكة الأجهزة -->
-            <div id="devices-grid" class="device-grid grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))"></div>
+            <div id="devices-grid" class="device-grid grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))"></div>
         </section>
 
-        <!-- ======= كشف السرقة ======= -->
         <section id="sec-theft" class="hidden">
             <div class="grid gap-6" style="grid-template-columns: 1fr 1fr">
-                <!-- إعدادات الاشتراك -->
                 <div class="stat-card">
-                    <h3 class="font-bold mb-4"><i class="fa-solid fa-file-contract ml-2" style="color:var(--info)"></i>بيانات الاشتراك</h3>
+                    <h3 class="font-bold mb-4">بيانات الاشتراك</h3>
                     <div class="space-y-4">
-                        <div>
-                            <label class="text-xs block mb-1" style="color:var(--muted)">اسم مزود الخدمة</label>
-                            <input type="text" id="isp-name" value="فودافون" class="w-full">
-                        </div>
-                        <div>
-                            <label class="text-xs block mb-1" style="color:var(--muted)">سرعة الاشتراك (ميجابت/ثانية)</label>
-                            <input type="number" id="isp-speed" value="100" class="w-full">
-                        </div>
-                        <div>
-                            <label class="text-xs block mb-1" style="color:var(--muted)">حد البيانات الشهري (جيجابايت)</label>
-                            <input type="number" id="isp-cap" value="500" class="w-full">
-                        </div>
-                        <div>
-                            <label class="text-xs block mb-1" style="color:var(--muted)">السعر الشهري (جنيه)</label>
-                            <input type="number" id="isp-price" value="350" class="w-full">
-                        </div>
-                        <button onclick="saveIspSettings()" class="btn-accent w-full text-sm">حفظ الإعدادات</button>
+                        <div><label class="text-xs block mb-1" style="color:var(--muted)">اسم مزود الخدمة</label><input type="text" id="isp-name" value="فودافون"></div>
+                        <div><label class="text-xs block mb-1" style="color:var(--muted)">سرعة الاشتراك (ميجابت)</label><input type="number" id="isp-speed" value="100"></div>
+                        <div><label class="text-xs block mb-1" style="color:var(--muted)">السعر الشهري (جنيه)</label><input type="number" id="isp-price" value="350"></div>
                     </div>
                 </div>
-
-                <!-- اختبار السرعة -->
-                <div class="stat-card">
-                    <h3 class="font-bold mb-4"><i class="fa-solid fa-gauge-high ml-2" style="color:var(--accent)"></i>اختبار السرعة</h3>
-                    <div class="flex flex-col items-center">
-                        <canvas id="gaugeCanvas" width="280" height="170"></canvas>
-                        <p class="text-3xl font-black mt-2" id="speed-result" style="color:var(--accent)">--</p>
-                        <p class="text-xs" style="color:var(--muted)">ميجابت/ثانية</p>
-                        <button onclick="runSpeedTest()" id="speed-test-btn" class="btn-accent mt-4 text-sm">
-                            <i class="fa-solid fa-play ml-1"></i>ابدأ الاختبار
-                        </button>
-                    </div>
+                <div class="stat-card flex flex-col items-center justify-center text-center">
+                    <h3 class="font-bold mb-4">اختبار السرعة</h3>
+                    <p class="text-4xl font-black mb-2" id="speed-result" style="color:var(--accent)">0</p>
+                    <p class="text-sm mb-4" style="color:var(--muted)">ميجابت/ثانية</p>
+                    <button onclick="runSpeedTest()" id="speed-test-btn" class="btn-accent w-full"><i class="fa-solid fa-gauge-high ml-1"></i>ابدأ الاختبار</button>
                 </div>
             </div>
-
-            <!-- حكم السرقة -->
-            <div id="verdict-section" class="mt-6">
+            <div class="mt-6">
                 <div id="verdict-card" class="verdict-card warning">
-                    <i class="fa-solid fa-scale-balanced text-4xl mb-3" style="color:var(--warn)"></i>
                     <h3 class="text-xl font-black mb-2" id="verdict-title">قم باختبار السرعة أولاً</h3>
                     <p class="text-sm" id="verdict-desc" style="color:var(--muted)">هنجولك هل الشركة بتسرق منك ولا لأ بعد ما تعمل الاختبار</p>
-                    <div id="verdict-details" class="mt-4 hidden">
-                        <div class="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                                <p class="text-xs" style="color:var(--muted)">السرعة المتعاقد عليها</p>
-                                <p class="text-lg font-bold" id="v-promised">100</p>
-                            </div>
-                            <div>
-                                <p class="text-xs" style="color:var(--muted)">السرعة الفعلية</p>
-                                <p class="text-lg font-bold" id="v-actual" style="color:var(--accent)">--</p>
-                            </div>
-                            <div>
-                                <p class="text-xs" style="color:var(--muted)">نسبة الفقد</p>
-                                <p class="text-lg font-bold" id="v-loss" style="color:var(--danger)">--</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- سجل الاختبارات -->
-            <div class="stat-card mt-6">
-                <h3 class="font-bold mb-4"><i class="fa-solid fa-clock-rotate-left ml-2" style="color:var(--info)"></i>سجل اختبارات السرعة</h3>
-                <canvas id="historyChart" height="150"></canvas>
-                <div id="test-history" class="mt-4 space-y-2 max-h-48 overflow-y-auto"></div>
-            </div>
-
-            <!-- تسوية البيانات -->
-            <div class="stat-card mt-6">
-                <h3 class="font-bold mb-4"><i class="fa-solid fa-scale-unbalanced ml-2" style="color:var(--warn)"></i>تسوية البيانات - هل بيتسرق منك داتا؟</h3>
-                <div class="grid grid-cols-3 gap-4 text-center mb-4">
-                    <div class="p-4 rounded-xl" style="background:var(--bg)">
-                        <p class="text-xs mb-1" style="color:var(--muted)">استهلاك أجهزتك الفعلي</p>
-                        <p class="text-xl font-black" id="real-usage">12.8 جيجا</p>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background:var(--bg)">
-                        <p class="text-xs mb-1" style="color:var(--muted)">المستهلك حسب الشركة</p>
-                        <p class="text-xl font-black" id="isp-usage" style="color:var(--warn)">16.2 جيجا</p>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background:var(--bg)">
-                        <p class="text-xs mb-1" style="color:var(--muted)">الفارق المشبوه</p>
-                        <p class="text-xl font-black" id="data-diff" style="color:var(--danger)">3.4 جيجا</p>
-                    </div>
-                </div>
-                <div id="data-verdict" class="text-center p-3 rounded-xl" style="background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.2)">
-                    <p class="text-sm font-bold" style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation ml-1"></i>في فارق 3.4 جيجا مش موجود ليه! ممكن يكون فيه سرقة بيانات أو أجهزة مخفية</p>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <!-- حاوية الإشعارات -->
     <div id="toast-container" class="fixed top-20 left-4 z-[200] space-y-3" style="width:360px;max-width:90vw"></div>
 
-    <!-- لوحة الإشعارات -->
-    <div id="notif-panel" class="fixed top-16 left-4 z-[150] w-80 rounded-2xl p-4 hidden" style="background:var(--card);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)">
-        <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold text-sm">الإشعارات</h4>
-            <button onclick="clearNotifications()" class="text-xs" style="color:var(--muted);background:none;border:none;cursor:pointer">مسح الكل</button>
-        </div>
-        <div id="notif-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
-    </div>
-
-    <!-- مودال إعدادات الجهاز -->
     <div id="device-modal" class="modal-overlay" onclick="if(event.target===this)closeDeviceModal()">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-5">
                 <h3 class="font-bold text-lg" id="modal-device-name">إعدادات الجهاز</h3>
-                <button onclick="closeDeviceModal()" style="background:none;border:none;cursor:pointer;color:var(--muted)">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <button onclick="closeDeviceModal()" style="background:none;border:none;cursor:pointer;color:var(--muted)"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="space-y-5">
-                <!-- اسم الجهاز -->
+                <div><label class="text-xs block mb-1" style="color:var(--muted)">اسم الجهاز</label><input type="text" id="modal-name"></div>
                 <div>
-                    <label class="text-xs block mb-1" style="color:var(--muted)">اسم الجهاز</label>
-                    <input type="text" id="modal-name" class="w-full">
-                </div>
-                <!-- حد السرعة -->
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <label class="text-xs" style="color:var(--muted)">حد السرعة</label>
-                        <span class="text-xs font-bold" id="modal-speed-val" style="color:var(--accent)">غير محدود</span>
-                    </div>
+                    <div class="flex justify-between mb-1"><label class="text-xs" style="color:var(--muted)">حد السرعة</label><span class="text-xs font-bold" id="modal-speed-val" style="color:var(--accent)">غير محدود</span></div>
                     <input type="range" id="modal-speed-limit" min="0" max="100" value="0" oninput="updateSpeedLabel(this.value)">
-                    <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
-                        <span>غير محدود</span><span>100 ميجابت</span>
-                    </div>
                 </div>
-                <!-- حد البيانات اليومي -->
                 <div>
-                    <div class="flex justify-between mb-1">
-                        <label class="text-xs" style="color:var(--muted)">حد البيانات اليومي</label>
-                        <span class="text-xs font-bold" id="modal-data-val" style="color:var(--accent)">غير محدود</span>
-                    </div>
+                    <div class="flex justify-between mb-1"><label class="text-xs" style="color:var(--muted)">حد البيانات اليومي</label><span class="text-xs font-bold" id="modal-data-val" style="color:var(--accent)">غير محدود</span></div>
                     <input type="range" id="modal-data-limit" min="0" max="50" value="0" step="0.5" oninput="updateDataLabel(this.value)">
-                    <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
-                        <span>غير محدود</span><span>50 جيجا</span>
-                    </div>
                 </div>
-                <!-- أزرار -->
                 <div class="flex gap-3 mt-2">
                     <button onclick="saveDeviceSettings()" class="btn-accent flex-1 text-sm">حفظ</button>
-                    <button id="modal-block-btn" onclick="toggleBlockDevice()" class="btn-danger text-sm">حظر</button>
+                    <button id="modal-block-btn" class="btn-danger text-sm">حظر</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== بيانات التطبيق ==========
         let currentTab = 'dashboard';
         let currentFilter = 'all';
         let editingDeviceId = null;
-        let notifications = [];
-        let speedTestRunning = false;
-        let liveChart, pieChart, historyChart;
+        let liveChart, pieChart;
         let liveData = [];
         let liveLabels = [];
 
-        // بيانات الأجهزة
         let devices = [
-            {
-                id: 1, name: 'آيفون 15 برو', mac: 'A4:83:E7:2F:11:3B', ip: '192.168.1.2',
-                icon: 'fa-mobile-screen', color: '#00e676', connected: true, isKnown: true, blocked: false,
-                dailyUsage: 2.3, dailyLimit: 5, speedLimit: 0, currentSpeed: 42,
-                firstSeen: '2024-01-15'
-            },
-            {
-                id: 2, name: 'لابتوب ديل', mac: 'D8:CB:8A:5C:22:19', ip: '192.168.1.3',
-                icon: 'fa-laptop', color: '#40c4ff', connected: true, isKnown: true, blocked: false,
-                dailyUsage: 5.1, dailyLimit: 10, speedLimit: 0, currentSpeed: 85,
-                firstSeen: '2024-01-10'
-            },
-            {
-                id: 3, name: 'سامسونج تاب A9', mac: 'F0:18:98:3D:44:A7', ip: '192.168.1.4',
-                icon: 'fa-tablet-screen-button', color: '#ffab40', connected: true, isKnown: true, blocked: false,
-                dailyUsage: 1.8, dailyLimit: 3, speedLimit: 0, currentSpeed: 28,
-                firstSeen: '2024-02-01'
-            },
-            {
-                id: 4, name: 'تلفزيون سمارت TCL', mac: '8C:19:B5:77:91:EE', ip: '192.168.1.5',
-                icon: 'fa-tv', color: '#e040fb', connected: true, isKnown: true, blocked: false,
-                dailyUsage: 3.2, dailyLimit: 8, speedLimit: 0, currentSpeed: 55,
-                firstSeen: '2024-01-20'
-            },
-            {
-                id: 5, name: 'جهاز مجهول', mac: '00:1A:2B:3C:4D:5E', ip: '192.168.1.18',
-                icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false,
-                dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15,
-                firstSeen: new Date().toISOString().split('T')[0]
-            }
+            { id: 1, name: 'آيفون 15 برو', mac: 'A4:83:E7:2F:11:3B', ip: '192.168.1.2', icon: 'fa-mobile-screen', color: '#00e676', connected: true, isKnown: true, blocked: false, dailyUsage: 2.3, dailyLimit: 5, speedLimit: 0, currentSpeed: 42 },
+            { id: 2, name: 'لابتوب ديل', mac: 'D8:CB:8A:5C:22:19', ip: '192.168.1.3', icon: 'fa-laptop', color: '#40c4ff', connected: true, isKnown: true, blocked: false, dailyUsage: 5.1, dailyLimit: 10, speedLimit: 0, currentSpeed: 85 },
+            { id: 3, name: 'سامسونج تاب A9', mac: 'F0:18:98:3D:44:A7', ip: '192.168.1.4', icon: 'fa-tablet-screen-button', color: '#ffab40', connected: true, isKnown: true, blocked: false, dailyUsage: 1.8, dailyLimit: 3, speedLimit: 0, currentSpeed: 28 },
+            { id: 4, name: 'تلفزيون سمارت', mac: '8C:19:B5:77:91:EE', ip: '192.168.1.5', icon: 'fa-tv', color: '#e040fb', connected: true, isKnown: true, blocked: false, dailyUsage: 3.2, dailyLimit: 8, speedLimit: 0, currentSpeed: 55 },
+            { id: 5, name: 'جهاز مجهول', mac: '00:1A:2B:3C:4D:5E', ip: '192.168.1.18', icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 }
         ];
 
-        // سجل اختبارات السرعة
-        let speedHistory = [
-            { date: 'السبت', speed: 68, promised: 100 },
-            { date: 'الأحد', speed: 72, promised: 100 },
-            { date: 'الاثنين', speed: 61, promised: 100 },
-            { date: 'الثلاثاء', speed: 75, promised: 100 },
-            { date: 'الأربعاء', speed: 58, promised: 100 },
-            { date: 'الخميس', speed: 70, promised: 100 },
-            { date: 'الجمعة', speed: 65, promised: 100 },
-        ];
-
-        // ========== التبويبات ==========
         function switchTab(tab) {
-            currentTab = tab;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+            document.querySelector('.tab-btn[data-tab="'+tab+'"]').classList.add('active');
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`sec-${tab}`).classList.remove('hidden');
+            document.getElementById('sec-'+tab).classList.remove('hidden');
             if (tab === 'devices') renderDevices();
-            if (tab === 'theft') drawGauge(0, 100);
         }
 
-        // ========== لوحة التحكم ==========
         function updateDashboard() {
-            const totalUsage = devices.filter(d => !d.blocked).reduce((s, d) => s + d.dailyUsage, 0);
-            const totalSpeed = devices.filter(d => d.connected && !d.blocked).reduce((s, d) => s + d.currentSpeed, 0);
-            const unknownCount = devices.filter(d => !d.isKnown && d.connected).length;
-
+            let totalUsage = 0; let totalSpeed = 0; let unknownCount = 0;
+            devices.forEach(d => {
+                if(!d.blocked) totalUsage += d.dailyUsage;
+                if(d.connected && !d.blocked) totalSpeed += d.currentSpeed;
+                if(!d.isKnown && d.connected) unknownCount++;
+            });
             document.getElementById('stat-total-usage').textContent = totalUsage.toFixed(1);
             document.getElementById('stat-speed').textContent = totalSpeed.toFixed(1);
             document.getElementById('stat-devices').textContent = devices.filter(d => d.connected).length;
-            document.getElementById('stat-unknown').textContent = unknownCount > 0 ? `${unknownCount} مجهول` : 'كلهم معروفين';
-
-            const alerts = unknownCount + devices.filter(d => d.blocked).length;
-            document.getElementById('stat-alerts').textContent = alerts;
-
+            document.getElementById('stat-unknown').textContent = unknownCount > 0 ? unknownCount + ' مجهول' : 'آمن';
+            document.getElementById('stat-alerts').textContent = unknownCount;
             renderDashboardDevices();
         }
 
         function renderDashboardDevices() {
             const container = document.getElementById('dashboard-devices');
             const active = devices.filter(d => d.connected && !d.blocked).slice(0, 4);
-            container.innerHTML = active.map(d => `
-                <div class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-white/5" style="border:1px solid var(--border)">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:${d.color}20">
-                        <i class="fa-solid ${d.icon}" style="color:${d.color}"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold truncate">${d.name}</p>
-                        <p class="text-xs" style="color:var(--muted)">${d.currentSpeed} ميجابت/ث | ${d.dailyUsage} جيجا اليوم</p>
-                    </div>
-                    ${!d.isKnown ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold" style="background:rgba(255,171,64,.15);color:var(--warn)">مجهول</span>' : ''}
-                </div>
-            `).join('');
+            let html = '';
+            active.forEach(d => {
+                html += '<div class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-white/5" style="border:1px solid var(--border)">';
+                html += '<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:'+d.color+'20"><i class="fa-solid '+d.icon+'" style="color:'+d.color+'"></i></div>';
+                html += '<div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">'+d.name+'</p><p class="text-xs" style="color:var(--muted)">'+d.currentSpeed.toFixed(0)+' Mb/s | '+d.dailyUsage+' GB اليوم</p></div>';
+                if(!d.isKnown) html += '<span class="px-2 py-0.5 rounded-full text-xs font-bold" style="background:rgba(255,171,64,.15);color:var(--warn)">مجهول</span>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
         }
 
-        // ========== الرسم البياني المباشر ==========
         function initLiveChart() {
             const ctx = document.getElementById('liveChart').getContext('2d');
-            // بيانات مبدئية
-            for (let i = 0; i < 30; i++) {
-                liveLabels.push('');
-                liveData.push(Math.random() * 40 + 50);
-            }
+            for (let i = 0; i < 30; i++) { liveLabels.push(''); liveData.push(Math.random() * 40 + 50); }
             liveChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: liveLabels,
-                    datasets: [{
-                        label: 'سرعة التحميل',
-                        data: liveData,
-                        borderColor: '#00e676',
-                        backgroundColor: 'rgba(0,230,118,0.08)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 300 },
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: {
-                            min: 0, max: 120,
-                            grid: { color: 'rgba(255,255,255,0.04)' },
-                            ticks: { color: '#5a7090', font: { size: 10 }, callback: v => v + ' Mb' }
-                        }
-                    }
-                }
+                type: 'line', data: { labels: liveLabels, datasets: [{ data: liveData, borderColor: '#00e676', backgroundColor: 'rgba(0,230,118,0.08)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
             });
-            // تحديث مباشر كل ثانيتين
             setInterval(() => {
-                const newSpeed = Math.random() * 30 + 55 + Math.sin(Date.now() / 5000) * 10;
-                liveData.push(Math.max(0, newSpeed));
+                liveData.push(Math.random() * 30 + 55 + Math.sin(Date.now() / 5000) * 10);
                 liveLabels.push('');
                 if (liveData.length > 40) { liveData.shift(); liveLabels.shift(); }
                 liveChart.update('none');
-                // تحديث سرعة الأجهزة بشكل عشوائي
-                devices.forEach(d => {
-                    if (d.connected && !d.blocked) {
-                        d.currentSpeed = Math.max(1, d.currentSpeed + (Math.random() - 0.5) * 8);
-                    }
-                });
+                devices.forEach(d => { if (d.connected && !d.blocked) d.currentSpeed = Math.max(1, d.currentSpeed + (Math.random() - 0.5) * 8); });
                 updateDashboard();
             }, 2000);
         }
@@ -598,634 +223,161 @@
             const ctx = document.getElementById('pieChart').getContext('2d');
             const activeDevices = devices.filter(d => d.connected && !d.blocked);
             pieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: activeDevices.map(d => d.name),
-                    datasets: [{
-                        data: activeDevices.map(d => d.dailyUsage),
-                        backgroundColor: activeDevices.map(d => d.color),
-                        borderColor: '#0d1829',
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#5a7090', font: { size: 10, family: 'Cairo' }, padding: 10 }
-                        }
-                    }
-                }
+                type: 'doughnut', data: { labels: activeDevices.map(d => d.name), datasets: [{ data: activeDevices.map(d => d.dailyUsage), backgroundColor: activeDevices.map(d => d.color), borderColor: '#0d1829', borderWidth: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#5a7090', font: { size: 10, family: 'Cairo' } } } } }
             });
         }
 
-        // ========== الأجهزة ==========
         function renderDevices() {
             const container = document.getElementById('devices-grid');
             let filtered = devices;
             if (currentFilter === 'known') filtered = devices.filter(d => d.isKnown);
             else if (currentFilter === 'unknown') filtered = devices.filter(d => !d.isKnown);
-            else if (currentFilter === 'blocked') filtered = devices.filter(d => d.blocked);
 
-            container.innerHTML = filtered.map((d, i) => {
+            let html = '';
+            filtered.forEach((d, i) => {
                 const usagePercent = d.dailyLimit > 0 ? Math.min(100, (d.dailyUsage / d.dailyLimit) * 100) : 0;
                 const isOverLimit = d.dailyLimit > 0 && d.dailyUsage >= d.dailyLimit;
                 const cardClass = d.blocked ? 'blocked' : (!d.isKnown ? 'unknown' : '');
-                return `
-                <div class="device-card ${cardClass} fade-up" style="animation-delay:${i * 0.08}s">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:${d.color}18">
-                                <i class="fa-solid ${d.icon} text-lg" style="color:${d.color}"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold">${d.name}</p>
-                                <p class="text-xs" style="color:var(--muted)">${d.ip} | ${d.mac}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${!d.isKnown ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold" style="background:rgba(255,171,64,.12);color:var(--warn)">مجهول</span>' : ''}
-                            ${d.blocked ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold" style="background:rgba(255,82,82,.12);color:var(--danger)">محظور</span>' : ''}
-                            ${d.connected && !d.blocked ? `<span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent)"></span>` : ''}
-                        </div>
-                    </div>
+                
+                html += '<div class="device-card '+cardClass+' fade-up" style="animation-delay:'+(i*0.08)+'s">';
+                html += '<div class="flex items-start justify-between mb-4"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:'+d.color+'18"><i class="fa-solid '+d.icon+' text-lg" style="color:'+d.color+'"></i></div><div><p class="font-bold">'+d.name+'</p><p class="text-xs" style="color:var(--muted)">'+d.ip+' | '+d.mac+'</p></div></div>';
+                if(!d.isKnown) html += '<span class="px-2 py-0.5 rounded-full text-xs font-bold" style="background:rgba(255,171,64,.12);color:var(--warn)">مجهول</span>';
+                html += '</div>';
+                
+                html += '<div class="grid grid-cols-2 gap-3 mb-4">';
+                html += '<div class="p-2.5 rounded-lg text-center" style="background:var(--bg)"><p class="text-xs" style="color:var(--muted)">السرعة</p><p class="text-lg font-black" style="color:'+d.color+'">'+(d.blocked?'0':d.currentSpeed.toFixed(0))+'</p><p class="text-xs" style="color:var(--muted)">Mb/s</p></div>';
+                html += '<div class="p-2.5 rounded-lg text-center" style="background:var(--bg)"><p class="text-xs" style="color:var(--muted)">استهلاك اليوم</p><p class="text-lg font-black">'+d.dailyUsage+'</p><p class="text-xs" style="color:var(--muted)">جيجا '+(d.dailyLimit>0?'من '+d.dailyLimit:'')+'</p></div>';
+                html += '</div>';
 
-                    <!-- السرعة والاستهلاك -->
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div class="p-2.5 rounded-lg text-center" style="background:var(--bg)">
-                            <p class="text-xs" style="color:var(--muted)">السرعة الحالية</p>
-                            <p class="text-lg font-black" style="color:${d.color}">${d.blocked ? '0' : d.currentSpeed.toFixed(0)}</p>
-                            <p class="text-xs" style="color:var(--muted)">ميجابت/ث</p>
-                        </div>
-                        <div class="p-2.5 rounded-lg text-center" style="background:var(--bg)">
-                            <p class="text-xs" style="color:var(--muted)">استهلاك اليوم</p>
-                            <p class="text-lg font-black" style="color:${isOverLimit ? 'var(--danger)' : 'var(--text)'}">${d.dailyUsage}</p>
-                            <p class="text-xs" style="color:var(--muted)">جيجا ${d.dailyLimit > 0 ? 'من ' + d.dailyLimit : ''}</p>
-                        </div>
-                    </div>
+                if(d.dailyLimit > 0) {
+                    html += '<div class="mb-4"><div class="w-full h-2 rounded-full" style="background:var(--border)"><div class="h-full rounded-full transition-all" style="width:'+usagePercent+'%;background:'+(isOverLimit?'var(--danger)':'var(--accent)')+'"></div></div>';
+                    html += '<p class="text-xs mt-1 text-center" style="color:'+(isOverLimit?'var(--danger)':'var(--muted)')+'">'+(isOverLimit?'تجاوزت الحد!':usagePercent.toFixed(0)+'% من الحد')+'</p></div>';
+                }
 
-                    <!-- شريط الاستهلاك -->
-                    ${d.dailyLimit > 0 ? `
-                    <div class="mb-4">
-                        <div class="w-full h-2 rounded-full" style="background:var(--border)">
-                            <div class="h-full rounded-full transition-all" style="width:${usagePercent}%;background:${isOverLimit ? 'var(--danger)' : 'var(--accent)'}"></div>
-                        </div>
-                        <p class="text-xs mt-1 text-center" style="color:${isOverLimit ? 'var(--danger)' : 'var(--muted)'}">
-                            ${isOverLimit ? 'تجاوز الحد اليومي!' : usagePercent.toFixed(0) + '% من الحد'}
-                        </p>
-                    </div>` : ''}
-
-                    <!-- حدود التقييد -->
-                    <div class="flex gap-4 mb-4 text-xs" style="color:var(--muted)">
-                        <span><i class="fa-solid fa-gauge ml-1"></i>حد السرعة: ${d.speedLimit > 0 ? d.speedLimit + ' ميجابت' : 'غير محدود'}</span>
-                        <span><i class="fa-solid fa-database ml-1"></i>حد البيانات: ${d.dailyLimit > 0 ? d.dailyLimit + ' جيجا' : 'غير محدود'}</span>
-                    </div>
-
-                    <!-- أزرار التحكم -->
-                    <div class="flex gap-2">
-                        <button onclick="openDeviceModal(${d.id})" class="btn-ghost text-xs flex-1">
-                            <i class="fa-solid fa-gear ml-1"></i>إعدادات
-                        </button>
-                        ${!d.isKnown ? `<button onclick="markAsKnown(${d.id})" class="btn-ghost text-xs" style="border-color:rgba(0,230,118,.3);color:var(--accent)">
-                            <i class="fa-solid fa-check ml-1"></i>معروف
-                        </button>` : ''}
-                        ${!d.blocked ? `<button onclick="blockDevice(${d.id})" class="btn-ghost text-xs" style="border-color:rgba(255,82,82,.3);color:var(--danger)">
-                            <i class="fa-solid fa-ban ml-1"></i>حظر
-                        </button>` : `<button onclick="unblockDevice(${d.id})" class="btn-ghost text-xs" style="border-color:rgba(0,230,118,.3);color:var(--accent)">
-                            <i class="fa-solid fa-check ml-1"></i>فك الحظر
-                        </button>`}
-                    </div>
-                </div>
-                `;
-            }).join('');
+                html += '<div class="flex gap-2">';
+                html += '<button onclick="openDeviceModal('+d.id+')" class="btn-ghost text-xs flex-1"><i class="fa-solid fa-gear ml-1"></i>إعدادات</button>';
+                if(!d.isKnown) html += '<button onclick="markAsKnown('+d.id+')" class="btn-ghost text-xs" style="border-color:rgba(0,230,118,.3);color:var(--accent)"><i class="fa-solid fa-check ml-1"></i>معروف</button>';
+                if(!d.blocked) html += '<button onclick="blockDevice('+d.id+')" class="btn-ghost text-xs" style="border-color:rgba(255,82,82,.3);color:var(--danger)"><i class="fa-solid fa-ban ml-1"></i>حظر</button>';
+                else html += '<button onclick="unblockDevice('+d.id+')" class="btn-ghost text-xs" style="border-color:rgba(0,230,118,.3);color:var(--accent)"><i class="fa-solid fa-check ml-1"></i>فك الحظر</button>';
+                html += '</div></div>';
+            });
+            container.innerHTML = html;
         }
 
         function filterDevices(filter) {
             currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('btn-accent');
-                b.classList.add('btn-ghost');
-            });
-            const activeBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
-            activeBtn.classList.remove('btn-ghost');
-            activeBtn.classList.add('btn-accent');
+            document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('btn-accent'); b.classList.add('btn-ghost'); });
+            event.target.classList.remove('btn-ghost'); event.target.classList.add('btn-accent');
             renderDevices();
         }
 
-        // ========== مودال الجهاز ==========
         function openDeviceModal(id) {
             editingDeviceId = id;
-            const d = devices.find(x => x.id === id);
-            if (!d) return;
+            const d = devices.find(x => x.id === id); if (!d) return;
             document.getElementById('modal-device-name').textContent = 'إعدادات: ' + d.name;
             document.getElementById('modal-name').value = d.name;
             document.getElementById('modal-speed-limit').value = d.speedLimit;
             document.getElementById('modal-data-limit').value = d.dailyLimit;
-            updateSpeedLabel(d.speedLimit);
-            updateDataLabel(d.dailyLimit);
-            const blockBtn = document.getElementById('modal-block-btn');
-            if (d.blocked) {
-                blockBtn.textContent = 'فك الحظر';
-                blockBtn.className = 'btn-accent text-sm';
-                blockBtn.onclick = () => { unblockDevice(id); closeDeviceModal(); };
-            } else {
-                blockBtn.textContent = 'حظر';
-                blockBtn.className = 'btn-danger text-sm';
-                blockBtn.onclick = () => { blockDevice(id); closeDeviceModal(); };
-            }
+            updateSpeedLabel(d.speedLimit); updateDataLabel(d.dailyLimit);
             document.getElementById('device-modal').classList.add('show');
         }
 
-        function closeDeviceModal() {
-            document.getElementById('device-modal').classList.remove('show');
-            editingDeviceId = null;
-        }
-
-        function updateSpeedLabel(val) {
-            document.getElementById('modal-speed-val').textContent = val == 0 ? 'غير محدود' : val + ' ميجابت/ث';
-        }
-        function updateDataLabel(val) {
-            document.getElementById('modal-data-val').textContent = val == 0 ? 'غير محدود' : val + ' جيجا/يوم';
-        }
+        function closeDeviceModal() { document.getElementById('device-modal').classList.remove('show'); editingDeviceId = null; }
+        function updateSpeedLabel(val) { document.getElementById('modal-speed-val').textContent = val == 0 ? 'غير محدود' : val + ' ميجابت/ث'; }
+        function updateDataLabel(val) { document.getElementById('modal-data-val').textContent = val == 0 ? 'غير محدود' : val + ' جيجا/يوم'; }
 
         function saveDeviceSettings() {
-            const d = devices.find(x => x.id === editingDeviceId);
-            if (!d) return;
+            const d = devices.find(x => x.id === editingDeviceId); if (!d) return;
             d.name = document.getElementById('modal-name').value;
             d.speedLimit = parseInt(document.getElementById('modal-speed-limit').value);
             d.dailyLimit = parseFloat(document.getElementById('modal-data-limit').value);
-            closeDeviceModal();
-            renderDevices();
-            showToast('تم الحفظ', `تم تحديث إعدادات ${d.name}`, 'success');
+            closeDeviceModal(); renderDevices(); updateDashboard();
+            showToast('تم الحفظ', 'تم تحديث إعدادات ' + d.name, 'success');
         }
 
         function markAsKnown(id) {
-            const d = devices.find(x => x.id === id);
-            if (!d) return;
-            d.isKnown = true;
-            d.name = document.getElementById('modal-name')?.value || d.name;
-            renderDevices();
-            updateDashboard();
-            showToast('تم التعرف', `${d.name} اتضاف للأجهزة المعروفة`, 'success');
+            const d = devices.find(x => x.id === id); if (!d) return;
+            d.isKnown = true; d.icon = 'fa-laptop'; d.color = '#40c4ff'; d.name = 'جهاز معروف';
+            renderDevices(); updateDashboard(); showToast('تم التعرف', d.name + ' اتضاف للأجهزة المعروفة', 'success');
         }
 
         function blockDevice(id) {
-            const d = devices.find(x => x.id === id);
-            if (!d) return;
-            d.blocked = true;
-            d.currentSpeed = 0;
-            renderDevices();
-            updateDashboard();
-            showToast('تم الحظر', `${d.name} اتحظر من الشبكة`, 'warning');
+            const d = devices.find(x => x.id === id); if (!d) return;
+            d.blocked = true; d.currentSpeed = 0;
+            renderDevices(); updateDashboard(); showToast('تم الحظر', d.name + ' اتحظر من الشبكة', 'warning');
         }
 
         function unblockDevice(id) {
-            const d = devices.find(x => x.id === id);
-            if (!d) return;
-            d.blocked = false;
-            d.currentSpeed = Math.random() * 30 + 20;
-            renderDevices();
-            updateDashboard();
-            showToast('تم فك الحظر', `${d.name} رجع للشبكة`, 'success');
+            const d = devices.find(x => x.id === id); if (!d) return;
+            d.blocked = false; d.currentSpeed = Math.random() * 30 + 20;
+            renderDevices(); updateDashboard(); showToast('تم فك الحظر', d.name + ' رجع للشبكة', 'success');
         }
 
-        // ========== الإشعارات ==========
-        function showToast(title, message, type = 'info') {
+        function showToast(title, message, type) {
             const container = document.getElementById('toast-container');
-            const colors = {
-                success: { bg: 'rgba(0,230,118,.1)', border: 'rgba(0,230,118,.3)', icon: 'fa-check-circle', color: '#00e676' },
-                warning: { bg: 'rgba(255,171,64,.1)', border: 'rgba(255,171,64,.3)', icon: 'fa-triangle-exclamation', color: '#ffab40' },
-                danger: { bg: 'rgba(255,82,82,.1)', border: 'rgba(255,82,82,.3)', icon: 'fa-shield-exclamation', color: '#ff5252' },
-                info: { bg: 'rgba(64,196,255,.1)', border: 'rgba(64,196,255,.3)', icon: 'fa-circle-info', color: '#40c4ff' }
-            };
+            const colors = { success: '#00e676', warning: '#ffab40', danger: '#ff5252', info: '#40c4ff' };
             const c = colors[type] || colors.info;
             const toast = document.createElement('div');
-            toast.className = 'toast-in';
-            toast.style.cssText = `background:${c.bg};border:1px solid ${c.border};border-radius:14px;padding:14px 18px;backdrop-filter:blur(10px)`;
-            toast.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid ${c.icon} mt-0.5" style="color:${c.color}"></i>
-                    <div class="flex-1">
-                        <p class="text-sm font-bold">${title}</p>
-                        <p class="text-xs mt-0.5" style="color:var(--muted)">${message}</p>
-                    </div>
-                    <button onclick="this.parentElement.parentElement.classList.replace('toast-in','toast-out');setTimeout(()=>this.parentElement.parentElement.remove(),400)" style="background:none;border:none;cursor:pointer;color:var(--muted)">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            `;
+            toast.style.cssText = 'background:var(--card);border:1px solid '+c+'40;border-radius:14px;padding:14px 18px;backdrop-filter:blur(10px);animation:slide-in-rtl .4s ease-out';
+            toast.innerHTML = '<div class="flex items-start gap-3"><i class="fa-solid fa-circle-info mt-0.5" style="color:'+c+'"></i><div class="flex-1"><p class="text-sm font-bold">'+title+'</p><p class="text-xs mt-0.5" style="color:var(--muted)">'+message+'</p></div></div>';
             container.appendChild(toast);
-            // إضافة للإشعارات
-            notifications.unshift({ title, message, type, time: new Date().toLocaleTimeString('ar-EG') });
-            updateNotifBadge();
-            // إزالة تلقائية
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.classList.replace('toast-in', 'toast-out');
-                    setTimeout(() => toast.remove(), 400);
-                }
-            }, 5000);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 4000);
         }
 
-        function updateNotifBadge() {
-            const badge = document.getElementById('notif-badge');
-            if (notifications.length > 0) {
-                badge.classList.remove('hidden');
-                badge.textContent = notifications.length > 9 ? '9+' : notifications.length;
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function toggleNotifPanel() {
-            const panel = document.getElementById('notif-panel');
-            panel.classList.toggle('hidden');
-            renderNotifList();
-        }
-
-        function renderNotifList() {
-            const list = document.getElementById('notif-list');
-            if (notifications.length === 0) {
-                list.innerHTML = '<p class="text-xs text-center py-4" style="color:var(--muted)">مفيش إشعارات جديدة</p>';
-                return;
-            }
-            list.innerHTML = notifications.slice(0, 10).map(n => {
-                const colors = { success: '#00e676', warning: '#ffab40', danger: '#ff5252', info: '#40c4ff' };
-                return `
-                <div class="p-2.5 rounded-lg" style="background:var(--bg);border:1px solid var(--border)">
-                    <div class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full" style="background:${colors[n.type] || colors.info}"></span>
-                        <p class="text-xs font-semibold flex-1">${n.title}</p>
-                        <span class="text-xs" style="color:var(--muted)">${n.time}</span>
-                    </div>
-                    <p class="text-xs mt-1 mr-3.5" style="color:var(--muted)">${n.message}</p>
-                </div>`;
-            }).join('');
-        }
-
-        function clearNotifications() {
-            notifications = [];
-            updateNotifBadge();
-            renderNotifList();
-        }
-
-        // ========== محاكاة جهاز جديد ==========
-        const randomNames = ['هواوي P40', 'شاومي ريدمي', 'أوبو Reno', 'لابتوب HP', 'آيباد برو', 'بلايستيشن 5', 'راوتر إضافي', 'جهاز طباعة واي فاي'];
         function simulateNewDevice() {
-            const existingMacs = devices.map(d => d.mac);
             const newMac = Array.from({length:6}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()).join(':');
-            if (existingMacs.includes(newMac)) return;
-
-            const name = randomNames[Math.floor(Math.random() * randomNames.length)];
-            const newDevice = {
-                id: Date.now(),
-                name: 'جهاز مجهول - ' + newMac.slice(-5),
-                mac: newMac,
-                ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
-                icon: 'fa-question',
-                color: '#ff5252',
-                connected: true,
-                isKnown: false,
-                blocked: false,
-                dailyUsage: +(Math.random() * 0.5).toFixed(1),
-                dailyLimit: 0,
-                speedLimit: 0,
-                currentSpeed: Math.floor(Math.random() * 20) + 5,
-                firstSeen: new Date().toISOString().split('T')[0]
-            };
-            devices.push(newDevice);
-            renderDevices();
-            updateDashboard();
-            showToast('جهاز جديد على الشبكة!', `اتكشف جهاز مجهول ${newMac} - اتحقق فوراً`, 'danger');
-
-            // تحديث بيانات التسوية
-            updateDataReconciliation();
-        }
-
-        // محاكاة اكتشاف تلقائي كل 45 ثانية
-        setInterval(() => {
-            if (Math.random() < 0.3) { // 30% احتمال كل مرة
-                simulateNewDevice();
-            }
-        }, 45000);
-
-        // ========== اختبار السرعة ==========
-        function drawGauge(value, max) {
-            const canvas = document.getElementById('gaugeCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
-
-            const cx = w / 2;
-            const cy = h - 20;
-            const r = Math.max(1, Math.min(cx, cy) - 30);
-            const startAngle = Math.PI;
-            const endAngle = 2 * Math.PI;
-
-            // القوس الخلفي
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, startAngle, endAngle);
-            ctx.strokeStyle = '#152040';
-            ctx.lineWidth = 18;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-
-            // القوس الملون
-            const ratio = Math.min(1, Math.max(0, value / max));
-            const valAngle = startAngle + ratio * Math.PI;
-            if (ratio > 0) {
-                const gradient = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
-                if (ratio < 0.5) {
-                    gradient.addColorStop(0, '#00e676');
-                    gradient.addColorStop(1, '#ffab40');
-                } else if (ratio < 0.75) {
-                    gradient.addColorStop(0, '#00e676');
-                    gradient.addColorStop(0.7, '#ffab40');
-                    gradient.addColorStop(1, '#ff5252');
-                } else {
-                    gradient.addColorStop(0, '#ffab40');
-                    gradient.addColorStop(1, '#ff5252');
-                }
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, startAngle, valAngle);
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 18;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-
-                // توهج
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, startAngle, valAngle);
-                ctx.strokeStyle = ratio < 0.6 ? 'rgba(0,230,118,0.2)' : 'rgba(255,82,82,0.2)';
-                ctx.lineWidth = 28;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-            }
-
-            // علامات
-            for (let i = 0; i <= 10; i++) {
-                const a = startAngle + (i / 10) * Math.PI;
-                const innerR = r - 30;
-                const outerR = r - 22;
-                ctx.beginPath();
-                ctx.moveTo(cx + Math.cos(a) * innerR, cy + Math.sin(a) * innerR);
-                ctx.lineTo(cx + Math.cos(a) * outerR, cy + Math.sin(a) * outerR);
-                ctx.strokeStyle = '#5a7090';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-
-            // مؤشر
-            const needleAngle = startAngle + ratio * Math.PI;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.lineTo(cx + Math.cos(needleAngle) * (r - 35), cy + Math.sin(needleAngle) * (r - 35));
-            ctx.strokeStyle = '#e0e8f0';
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-
-            // دائرة الوسط
-            ctx.beginPath();
-            ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#e0e8f0';
-            ctx.fill();
+            const newDevice = { id: Date.now(), name: 'جهاز مجهول - ' + newMac.slice(-5), mac: newMac, ip: '192.168.1.'+ (Math.floor(Math.random()*200)+10), icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 };
+            devices.push(newDevice); renderDevices(); updateDashboard();
+            showToast('جهاز جديد!', 'اتكشف جهاز مجهول على الشبكة', 'danger');
         }
 
         function runSpeedTest() {
-            if (speedTestRunning) return;
-            speedTestRunning = true;
             const btn = document.getElementById('speed-test-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin ml-1"></i>جاري الاختبار...';
-            document.getElementById('speed-result').textContent = '...';
-
-            const promisedSpeed = parseInt(document.getElementById('isp-speed').value) || 100;
-            // السرعة الفعلية العشوائية (60-85% من المتعاقد عليه = فيه سرقة)
-            const actualSpeed = promisedSpeed * (0.55 + Math.random() * 0.3);
-            let currentVal = 0;
-            const duration = 4000;
-            const startTime = Date.now();
-
-            function animate() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(1, elapsed / duration);
-                // تسريع تدريجي مع تذبذب
-                currentVal = actualSpeed * progress * (0.7 + 0.3 * Math.sin(progress * Math.PI));
-                currentVal = Math.max(0, currentVal);
-
-                drawGauge(currentVal, promisedSpeed);
-                document.getElementById('speed-result').textContent = currentVal.toFixed(1);
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // انتهى الاختبار
-                    const finalSpeed = actualSpeed;
-                    drawGauge(finalSpeed, promisedSpeed);
-                    document.getElementById('speed-result').textContent = finalSpeed.toFixed(1);
-                    speedTestRunning = false;
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-rotate ml-1"></i>إعادة الاختبار';
-
-                    // إضافة للسجل
-                    const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-                    const dayName = days[new Date().getDay()];
-                    speedHistory.push({ date: dayName, speed: +finalSpeed.toFixed(1), promised: promisedSpeed });
-                    if (speedHistory.length > 12) speedHistory.shift();
-
-                    updateHistoryChart();
-                    renderTestHistory();
-                    updateVerdict(finalSpeed, promisedSpeed);
+            const res = document.getElementById('speed-result');
+            const promised = parseInt(document.getElementById('isp-speed').value) || 100;
+            const price = parseInt(document.getElementById('isp-price').value) || 350;
+            
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin ml-1"></i>جاري الفحص...';
+            const actualSpeed = Math.floor(promised * (0.55 + Math.random() * 0.3));
+            let current = 0;
+            const interval = setInterval(() => {
+                current += Math.floor(Math.random() * 10 + 5);
+                if(current >= actualSpeed) {
+                    current = actualSpeed; clearInterval(interval);
+                    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate ml-1"></i>إعادة الاختبار';
+                    updateVerdict(actualSpeed, promised, price);
                 }
-            }
-            animate();
+                res.innerText = current;
+            }, 100);
         }
 
-        function updateVerdict(actual, promised) {
+        function updateVerdict(actual, promised, price) {
             const pct = (actual / promised) * 100;
-            const loss = promised - actual;
             const card = document.getElementById('verdict-card');
             const title = document.getElementById('verdict-title');
             const desc = document.getElementById('verdict-desc');
-            const details = document.getElementById('verdict-details');
-
-            document.getElementById('v-promised').textContent = promised + ' ميجابت';
-            document.getElementById('v-actual').textContent = actual.toFixed(1) + ' ميجابت';
-            document.getElementById('v-loss').textContent = loss.toFixed(1) + ' ميجابت (' + (100 - pct).toFixed(0) + '%)';
-
-            details.classList.remove('hidden');
-
-            const ispName = document.getElementById('isp-name').value || 'مزود الخدمة';
-
-            if (pct >= 90) {
+            
+            if (pct >= 85) {
                 card.className = 'verdict-card safe';
-                title.innerHTML = '<i class="fa-solid fa-shield-check ml-2" style="color:#00e676"></i>الشركة أمينة';
-                desc.textContent = `السرعة الفعلية ${pct.toFixed(0)}% من المتعاقد عليه - ده معدل كويس`;
-            } else if (pct >= 70) {
+                title.innerHTML = '<i class="fa-solid fa-shield-halved ml-2" style="color:#00e676"></i>الشركة أمينة';
+                desc.textContent = 'السرعة الفعلية '+pct.toFixed(0)+'% من المتعاقد عليه - ده معدل كويس';
+            } else if (pct >= 60) {
                 card.className = 'verdict-card warning';
                 title.innerHTML = '<i class="fa-solid fa-triangle-exclamation ml-2" style="color:#ffab40"></i>فيه تقصير من الشركة';
-                desc.textContent = `السرعة الفعلية ${pct.toFixed(0)}% بس من المتعاقد عليه! ${ispName} مش بيدلك اللي اتفقتوا عليه`;
+                desc.textContent = 'متحصلش الا '+pct.toFixed(0)+'% من سرعتك! بيرموا '+Math.floor(price * (1 - pct/100))+' جنيه في السريع';
             } else {
                 card.className = 'verdict-card danger';
-                title.innerHTML = '<i class="fa-solid fa-skull-crossbones ml-2" style="color:#ff5252"></i>الشركة بتسرقك!`;
-                desc.textContent = `بتدفع على ${promised} ميجابت بس بتحصل على ${actual.toFixed(0)} بس! يعني بيسرقوا منك ${(100-pct).toFixed(0)}% من سرعتك!`;
-            }
-
-            // حساب الفلوس المهدرة
-            if (pct < 90) {
-                const price = parseInt(document.getElementById('isp-price').value) || 350;
-                const wasted = (price * (1 - pct / 100)).toFixed(0);
-                desc.textContent += ` - يعني حوالي ${wasted} جنيه من فلوسك بتروح هدر كل شهر!`;
+                title.innerHTML = '<i class="fa-solid fa-skull-crossbones ml-2" style="color:#ff5252"></i>الشركة بتسرقك!';
+                desc.textContent = 'بتدفع على '+promised+' ميجابت وتاخد '+actual+' بس! بيسرقوا '+Math.floor(price * (1 - pct/100))+' جنيه منك كل شهر!';
             }
         }
 
-        // ========== رسم بياني للسجل ==========
-        function initHistoryChart() {
-            const ctx = document.getElementById('historyChart').getContext('2d');
-            historyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: speedHistory.map(h => h.date),
-                    datasets: [
-                        {
-                            label: 'السرعة المتعاقد عليها',
-                            data: speedHistory.map(h => h.promised),
-                            backgroundColor: 'rgba(64,196,255,0.15)',
-                            borderColor: '#40c4ff',
-                            borderWidth: 1,
-                            borderRadius: 6
-                        },
-                        {
-                            label: 'السرعة الفعلية',
-                            data: speedHistory.map(h => h.speed),
-                            backgroundColor: 'rgba(0,230,118,0.2)',
-                            borderColor: '#00e676',
-                            borderWidth: 1,
-                            borderRadius: 6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#5a7090', font: { family: 'Cairo', size: 11 } } }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#5a7090', font: { family: 'Cairo', size: 10 } } },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.04)' },
-                            ticks: { color: '#5a7090', font: { size: 10 }, callback: v => v + ' Mb' },
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateHistoryChart() {
-            if (!historyChart) return;
-            historyChart.data.labels = speedHistory.map(h => h.date);
-            historyChart.data.datasets[0].data = speedHistory.map(h => h.promised);
-            historyChart.data.datasets[1].data = speedHistory.map(h => h.speed);
-            historyChart.update();
-        }
-
-        function renderTestHistory() {
-            const container = document.getElementById('test-history');
-            container.innerHTML = speedHistory.slice().reverse().slice(0, 8).map(h => {
-                const pct = (h.speed / h.promised * 100).toFixed(0);
-                const color = pct >= 90 ? '#00e676' : pct >= 70 ? '#ffab40' : '#ff5252';
-                return `
-                <div class="flex items-center gap-3 p-2.5 rounded-lg" style="background:var(--bg)">
-                    <span class="w-2 h-2 rounded-full" style="background:${color}"></span>
-                    <span class="text-xs flex-1" style="color:var(--muted)">${h.date}</span>
-                    <span class="text-sm font-bold" style="color:${color}">${h.speed} ميجابت</span>
-                    <span class="text-xs" style="color:var(--muted)">(${pct}%)</span>
-                </div>`;
-            }).join('');
-        }
-
-        // ========== تسوية البيانات ==========
-        function updateDataReconciliation() {
-            const realUsage = devices.filter(d => !d.blocked).reduce((s, d) => s + d.dailyUsage, 0);
-            // الشركة بتقول إنك استهلكت أكتر (محاكاة)
-            const ispReported = realUsage * (1 + Math.random() * 0.3 + 0.1);
-            const diff = ispReported - realUsage;
-
-            document.getElementById('real-usage').textContent = realUsage.toFixed(1) + ' جيجا';
-            document.getElementById('isp-usage').textContent = ispReported.toFixed(1) + ' جيجا';
-            document.getElementById('data-diff').textContent = diff.toFixed(1) + ' جيجا';
-
-            const verdictDiv = document.getElementById('data-verdict');
-            if (diff > 1) {
-                verdictDiv.style.background = 'rgba(255,82,82,.08)';
-                verdictDiv.style.border = '1px solid rgba(255,82,82,.2)';
-                verdictDiv.innerHTML = `<p class="text-sm font-bold" style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation ml-1"></i>في فارق ${diff.toFixed(1)} جيجا مش موجود ليه! ممكن يكون فيه سرقة بيانات أو أجهزة مخفية بتستهلك من غير ما تعرف</p>`;
-            } else {
-                verdictDiv.style.background = 'rgba(0,230,118,.08)';
-                verdictDiv.style.border = '1px solid rgba(0,230,118,.2)';
-                verdictDiv.innerHTML = `<p class="text-sm font-bold" style="color:var(--accent)"><i class="fa-solid fa-check-circle ml-1"></i>مفيش فارق كبير - استهلاكك متناسب مع اللي الشركة بتقوله</p>`;
-            }
-        }
-
-        // ========== إعدادات مزود الخدمة ==========
-        function saveIspSettings() {
-            showToast('تم الحفظ', 'تم تحديث بيانات الاشتراك', 'success');
-        }
-
-        // ========== محاكاة الاستهلاك ==========
-        setInterval(() => {
-            devices.forEach(d => {
-                if (d.connected && !d.blocked) {
-                    d.dailyUsage = +(d.dailyUsage + Math.random() * 0.02).toFixed(2);
-                    // تطبيق حد البيانات
-                    if (d.dailyLimit > 0 && d.dailyUsage >= d.dailyLimit) {
-                        d.currentSpeed = Math.min(d.currentSpeed, 1);
-                    }
-                    // تطبيق حد السرعة
-                    if (d.speedLimit > 0 && d.currentSpeed > d.speedLimit) {
-                        d.currentSpeed = d.speedLimit;
-                    }
-                }
-            });
-            updateDashboard();
-            updateDataReconciliation();
-        }, 5000);
-
-        // ========== تهيئة التطبيق ==========
         function init() {
-            initLiveChart();
-            initPieChart();
-            initHistoryChart();
-            drawGauge(0, 100);
-            updateDashboard();
-            renderTestHistory();
-            updateDataReconciliation();
-
-            // إشعار ترحيبي
-            setTimeout(() => {
-                showToast('مرحباً بيك', 'NetGuard بيحمي شبكتك دلوقتي', 'success');
-            }, 1000);
-
-            // محاكاة اكتشاف جهاز مجهول بعد 8 ثواني
-            setTimeout(() => {
-                simulateNewDevice();
-            }, 8000);
+            initLiveChart(); initPieChart(); updateDashboard();
+            setTimeout(() => { showToast('مرحباً بيك', 'NetGuard بيحمي شبكتك دلوقتي', 'success'); }, 1000);
+            setTimeout(() => { simulateNewDevice(); }, 8000);
         }
-
-        // إغلاق لوحة الإشعارات لما تضغط برهها
-        document.addEventListener('click', (e) => {
-            const panel = document.getElementById('notif-panel');
-            if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !e.target.closest('button[onclick*="toggleNotifPanel"]')) {
-                panel.classList.add('hidden');
-            }
-        });
 
         init();
     </script>
