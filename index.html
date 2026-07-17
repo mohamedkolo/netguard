@@ -104,8 +104,8 @@
                 <div class="stat-card"><div class="glow" style="background:var(--danger)"></div><p class="text-xs mb-1" style="color:var(--muted)">تنبيهات أمنية</p><p class="text-2xl font-black" id="stat-alerts">2</p><p class="text-xs" style="color:var(--danger)">تحقق فوراً</p></div>
             </div>
             <div class="chart-grid grid gap-4 mb-6" style="grid-template-columns: 2fr 1fr">
-                <div class="stat-card"><h3 class="font-bold mb-2">مراقبة النطاق المباشر</h3><canvas id="liveChart" height="150"></canvas></div>
-                <div class="stat-card"><h3 class="font-bold mb-2">استهلاك الأجهزة</h3><canvas id="pieChart" height="150"></canvas></div>
+                <div class="stat-card"><h3 class="font-bold mb-2">مراقبة النطاق المباشر</h3><div style="position:relative;height:220px"><canvas id="liveChart"></canvas></div></div>
+                <div class="stat-card"><h3 class="font-bold mb-2">استهلاك الأجهزة</h3><div style="position:relative;height:220px"><canvas id="pieChart"></canvas></div></div>
             </div>
             <div class="stat-card">
                 <h3 class="font-bold mb-4">أحدث الأجهزة النشطة</h3>
@@ -231,11 +231,11 @@
         let liveLabels = [];
 
         let devices = [
-            { id: 1, name: 'آيفون 15 برو', mac: 'A4:83:E7:2F:11:3B', ip: '192.168.1.2', icon: 'fa-mobile-screen', color: '#00e676', connected: true, isKnown: true, blocked: false, dailyUsage: 2.3, dailyLimit: 5, speedLimit: 0, currentSpeed: 42 },
-            { id: 2, name: 'لابتوب ديل', mac: 'D8:CB:8A:5C:22:19', ip: '192.168.1.3', icon: 'fa-laptop', color: '#40c4ff', connected: true, isKnown: true, blocked: false, dailyUsage: 5.1, dailyLimit: 10, speedLimit: 0, currentSpeed: 85 },
-            { id: 3, name: 'سامسونج تاب A9', mac: 'F0:18:98:3D:44:A7', ip: '192.168.1.4', icon: 'fa-tablet-screen-button', color: '#ffab40', connected: true, isKnown: true, blocked: false, dailyUsage: 1.8, dailyLimit: 3, speedLimit: 0, currentSpeed: 28 },
-            { id: 4, name: 'تلفزيون سمارت', mac: '8C:19:B5:77:91:EE', ip: '192.168.1.5', icon: 'fa-tv', color: '#e040fb', connected: true, isKnown: true, blocked: false, dailyUsage: 3.2, dailyLimit: 8, speedLimit: 0, currentSpeed: 55 },
-            { id: 5, name: 'جهاز مجهول', mac: '00:1A:2B:3C:4D:5E', ip: '192.168.1.18', icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 }
+            { id: 1, name: 'مثال: موبايل (تجريبي)', mac: 'A4:83:E7:2F:11:3B', ip: '192.168.1.2', icon: 'fa-mobile-screen', color: '#00e676', connected: true, isKnown: true, blocked: false, dailyUsage: 2.3, dailyLimit: 5, speedLimit: 0, currentSpeed: 42 },
+            { id: 2, name: 'مثال: لابتوب (تجريبي)', mac: 'D8:CB:8A:5C:22:19', ip: '192.168.1.3', icon: 'fa-laptop', color: '#40c4ff', connected: true, isKnown: true, blocked: false, dailyUsage: 5.1, dailyLimit: 10, speedLimit: 0, currentSpeed: 85 },
+            { id: 3, name: 'مثال: تابلت (تجريبي)', mac: 'F0:18:98:3D:44:A7', ip: '192.168.1.4', icon: 'fa-tablet-screen-button', color: '#ffab40', connected: true, isKnown: true, blocked: false, dailyUsage: 1.8, dailyLimit: 3, speedLimit: 0, currentSpeed: 28 },
+            { id: 4, name: 'مثال: تلفزيون سمارت (تجريبي)', mac: '8C:19:B5:77:91:EE', ip: '192.168.1.5', icon: 'fa-tv', color: '#e040fb', connected: true, isKnown: true, blocked: false, dailyUsage: 3.2, dailyLimit: 8, speedLimit: 0, currentSpeed: 55 },
+            { id: 5, name: 'مثال: جهاز مجهول (تجريبي)', mac: '00:1A:2B:3C:4D:5E', ip: '192.168.1.18', icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 }
         ];
 
         function switchTab(tab) {
@@ -371,7 +371,7 @@
 
         function markAsKnown(id) {
             const d = devices.find(x => x.id === id); if (!d) return;
-            d.isKnown = true; d.icon = 'fa-laptop'; d.color = '#40c4ff'; d.name = 'جهاز معروف';
+            d.isKnown = true; d.icon = 'fa-laptop'; d.color = '#40c4ff'; d.name = 'مثال: جهاز معروف (تجريبي)';
             renderDevices(); updateDashboard(); showToast('تم التعرف', d.name + ' اتضاف للأجهزة المعروفة', 'success');
         }
 
@@ -400,9 +400,9 @@
 
         function simulateNewDevice() {
             const newMac = Array.from({length:6}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()).join(':');
-            const newDevice = { id: Date.now(), name: 'جهاز مجهول - ' + newMac.slice(-5), mac: newMac, ip: '192.168.1.'+ (Math.floor(Math.random()*200)+10), icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 };
+            const newDevice = { id: Date.now(), name: 'مثال: جهاز مجهول - ' + newMac.slice(-5) + ' (تجريبي)', mac: newMac, ip: '192.168.1.'+ (Math.floor(Math.random()*200)+10), icon: 'fa-question', color: '#ff5252', connected: true, isKnown: false, blocked: false, dailyUsage: 0.4, dailyLimit: 0, speedLimit: 0, currentSpeed: 15 };
             devices.push(newDevice); renderDevices(); updateDashboard();
-            showToast('جهاز جديد!', 'اتكشف جهاز مجهول على الشبكة', 'danger');
+            showToast('مثال توضيحي', 'كده هتبقى شكل التنبيه لو جهاز مجهول اتصل بشبكتك فعليًا', 'warning');
         }
 
         function runSpeedTest() {
