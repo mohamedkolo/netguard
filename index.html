@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NetGuard - حارس النت</title>
+    <title>NetGuard - إزاي تعرف مين واصل على الواي فاي بتاعك ومين بيسرق نتك</title>
+    <meta name="description" content="جرب أداة توضيحية لمراقبة شبكة الواي فاي، واتعرف على علامات سرقة النت وأفضل الأدوات الحقيقية لحماية شبكتك من الأجهزة المجهولة.">
+    <meta property="og:title" content="NetGuard - حارس النت">
+    <meta property="og:description" content="إزاي تعرف مين واصل على الواي فاي بتاعك ومين بيسرق نتك — دليل عربي بسيط + أدوات حماية حقيقية.">
+    <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -51,16 +55,38 @@
 
     <header class="sticky top-0 z-50" style="background:rgba(6,10,19,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)">
         <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-            <div class="flex items-center gap-3">
+            <a href="index.html" class="flex items-center gap-3" style="text-decoration:none;color:inherit">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent)"><i class="fa-solid fa-shield-halved text-lg" style="color:var(--bg)"></i></div>
                 <div><h1 class="text-lg font-bold leading-tight" style="color:var(--accent)">NetGuard</h1><p class="text-xs" style="color:var(--muted)">حارس النت</p></div>
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)">
-                <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent)"></span>
-                <span class="text-xs font-semibold" style="color:var(--accent)">متصل</span>
-            </div>
+            </a>
+            <nav class="hidden md:flex items-center gap-5 text-sm">
+                <a href="signs-of-wifi-theft.html" style="color:var(--muted);text-decoration:none" class="hover:text-white">علامات سرقة الواي فاي</a>
+                <a href="best-wifi-security-tools.html" style="color:var(--muted);text-decoration:none" class="hover:text-white">أفضل أدوات الحماية</a>
+            </nav>
         </div>
     </header>
+
+    <section class="max-w-4xl mx-auto px-4 pt-12 pb-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg mb-5" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)">
+            <i class="fa-solid fa-shield-halved" style="color:var(--accent)"></i>
+            <span class="text-xs font-semibold" style="color:var(--accent)">دليلك لحماية شبكة الواي فاي بتاعتك</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-black mb-4 leading-tight">مين واصل على الواي فاي بتاعك دلوقتي؟ <span style="color:var(--accent)">وهل حد بيسرق نتك؟</span></h1>
+        <p class="text-base md:text-lg mx-auto max-w-2xl" style="color:var(--muted)">
+            جهاز غريب واصل عندك، السرعة بطيئة من غير سبب، أو حاسس إن شركة النت مش بتديك اللي بتدفع فيه —
+            كل ده علامات تستاهل تتأكد منها. جرب الأداة التوضيحية تحت، واقرا إزاي تحمي نفسك فعليًا.
+        </p>
+        <a href="#demo" class="btn-accent inline-block mt-6"><i class="fa-solid fa-arrow-down ml-2"></i>جرب الأداة التفاعلية</a>
+    </section>
+
+    <div id="demo" class="max-w-7xl mx-auto px-4 mb-4">
+        <div class="stat-card" style="border-color:rgba(255,171,64,.35);background:rgba(255,171,64,.06)">
+            <p class="text-sm font-semibold" style="color:var(--warn)"><i class="fa-solid fa-circle-info ml-1"></i>
+                دي تجربة تفاعلية (Demo) ببيانات وهمية عشان تشوف شكل أداة مراقبة الشبكة — مش متصلة فعليًا بشبكتك ومفيش نتيجة فيها حقيقية.
+                للحماية الفعلية، شوف <a href="best-wifi-security-tools.html" style="color:var(--accent);text-decoration:underline">الأدوات الحقيقية الموصى بيها</a>.
+            </p>
+        </div>
+    </div>
 
     <nav class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto" style="border-bottom:1px solid var(--border)">
         <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-line ml-2"></i>لوحة التحكم</button>
@@ -122,6 +148,53 @@
         </section>
 
     </main>
+
+    <section class="max-w-7xl mx-auto px-4 py-10">
+        <h2 class="text-2xl font-black mb-1">أدوات حقيقية لحماية شبكتك</h2>
+        <p class="text-sm mb-6" style="color:var(--muted)">الأداة اللي جربتها فوق تجربة توضيحية بس — الأدوات دي حقيقية وشغالة فعلاً. (بعض الروابط دي إحالة/عمولة — بتدفع نفس السعر، وممكن نكسب عمولة صغيرة).</p>
+        <div class="grid gap-4" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+            <div class="stat-card">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style="background:rgba(0,230,118,.12)"><i class="fa-solid fa-wifi text-lg" style="color:var(--accent)"></i></div>
+                <h3 class="font-bold mb-2">Fing</h3>
+                <p class="text-sm mb-4" style="color:var(--muted)">أشهر تطبيق مجاني لمسح شبكة الواي فاي وعرض كل الأجهزة المتصلة فعليًا، ومتاح موبايل وكمبيوتر.</p>
+                <a href="https://www.fing.com/" target="_blank" rel="noopener sponsored" class="btn-ghost text-sm inline-block">جرّب Fing <i class="fa-solid fa-arrow-up-left ml-1"></i></a>
+            </div>
+            <div class="stat-card">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style="background:rgba(64,196,255,.12)"><i class="fa-solid fa-desktop text-lg" style="color:var(--info)"></i></div>
+                <h3 class="font-bold mb-2">GlassWire</h3>
+                <p class="text-sm mb-4" style="color:var(--muted)">مراقبة استهلاك النت وتنبيهات فورية لما جهاز جديد يتصل بشبكتك — لويندوز وأندرويد.</p>
+                <a href="https://www.glasswire.com/" target="_blank" rel="noopener sponsored" class="btn-ghost text-sm inline-block">جرّب GlassWire <i class="fa-solid fa-arrow-up-left ml-1"></i></a>
+            </div>
+            <div class="stat-card">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,171,64,.12)"><i class="fa-solid fa-lock text-lg" style="color:var(--warn)"></i></div>
+                <h3 class="font-bold mb-2">غيّر باسورد الراوتر</h3>
+                <p class="text-sm mb-4" style="color:var(--muted)">أسرع وأرخص حماية: ادخل إعدادات الراوتر (192.168.1.1 غالبًا) وغيّر الباسورد الافتراضي فورًا.</p>
+                <a href="signs-of-wifi-theft.html" class="btn-ghost text-sm inline-block">اقرا الدليل الكامل <i class="fa-solid fa-arrow-up-left ml-1"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ مكان إعلانات Google AdSense ═══
+         سجّل حساب على https://adsense.google.com بعد ما يبقى عندك محتوى كافي،
+         وحط كود الـ ad unit بتاعك هنا بدل الكومنت ده. -->
+    <!-- <div class="max-w-7xl mx-auto px-4 my-6"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto"></ins></div> -->
+
+    <footer class="border-t mt-6" style="border-color:var(--border)">
+        <div class="max-w-7xl mx-auto px-4 py-8 grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+            <div>
+                <h4 class="font-bold mb-2" style="color:var(--accent)">NetGuard</h4>
+                <p class="text-sm" style="color:var(--muted)">دليل عربي بسيط لحماية شبكة الواي فاي بتاعتك من السرقة والأجهزة المجهولة.</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-2 text-sm">مقالات</h4>
+                <ul class="text-sm space-y-2" style="color:var(--muted)">
+                    <li><a href="signs-of-wifi-theft.html" class="hover:text-white">إزاي تعرف حد بيسرق منك النت</a></li>
+                    <li><a href="best-wifi-security-tools.html" class="hover:text-white">أفضل أدوات حماية الواي فاي 2026</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center text-xs pb-6" style="color:var(--muted)">© 2026 NetGuard — المحتوى للإرشاد العام وليس بديلاً عن الدعم الفني لمزود خدمتك.</div>
+    </footer>
 
     <div id="toast-container" class="fixed top-20 left-4 z-[200] space-y-3" style="width:360px;max-width:90vw"></div>
 
@@ -358,24 +431,25 @@
             const title = document.getElementById('verdict-title');
             const desc = document.getElementById('verdict-desc');
             
+            const demoNote = ' (نتيجة تجريبية عشوائية — مش قياس حقيقي لسرعتك. لقياس حقيقي استخدم Speedtest.net أو Fast.com وقارن بنفسك).';
             if (pct >= 85) {
                 card.className = 'verdict-card safe';
-                title.innerHTML = '<i class="fa-solid fa-shield-halved ml-2" style="color:#00e676"></i>الشركة أمينة';
-                desc.textContent = 'السرعة الفعلية '+pct.toFixed(0)+'% من المتعاقد عليه - ده معدل كويس';
+                title.innerHTML = '<i class="fa-solid fa-shield-halved ml-2" style="color:#00e676"></i>مثال: السرعة قريبة من المتعاقد عليه';
+                desc.textContent = 'في المثال ده، السرعة '+pct.toFixed(0)+'% من المتعاقد عليه - ده معدل كويس.' + demoNote;
             } else if (pct >= 60) {
                 card.className = 'verdict-card warning';
-                title.innerHTML = '<i class="fa-solid fa-triangle-exclamation ml-2" style="color:#ffab40"></i>فيه تقصير من الشركة';
-                desc.textContent = 'متحصلش الا '+pct.toFixed(0)+'% من سرعتك! بيرموا '+Math.floor(price * (1 - pct/100))+' جنيه في السريع';
+                title.innerHTML = '<i class="fa-solid fa-triangle-exclamation ml-2" style="color:#ffab40"></i>مثال: فرق ملحوظ عن المتعاقد عليه';
+                desc.textContent = 'في المثال ده، السرعة '+pct.toFixed(0)+'% بس من المتعاقد عليه.' + demoNote;
             } else {
                 card.className = 'verdict-card danger';
-                title.innerHTML = '<i class="fa-solid fa-skull-crossbones ml-2" style="color:#ff5252"></i>الشركة بتسرقك!';
-                desc.textContent = 'بتدفع على '+promised+' ميجابت وتاخد '+actual+' بس! بيسرقوا '+Math.floor(price * (1 - pct/100))+' جنيه منك كل شهر!';
+                title.innerHTML = '<i class="fa-solid fa-triangle-exclamation ml-2" style="color:#ff5252"></i>مثال: فرق كبير عن المتعاقد عليه';
+                desc.textContent = 'في المثال ده، بتدفع على '+promised+' ميجابت وتاخد '+actual+' بس.' + demoNote;
             }
         }
 
         function init() {
             initLiveChart(); initPieChart(); updateDashboard();
-            setTimeout(() => { showToast('مرحباً بيك', 'NetGuard بيحمي شبكتك دلوقتي', 'success'); }, 1000);
+            setTimeout(() => { showToast('تجربة توضيحية', 'البيانات اللي هتشوفها كلها وهمية — دي مجرد ديمو لشكل الأداة الحقيقية', 'info'); }, 1000);
             setTimeout(() => { simulateNewDevice(); }, 8000);
         }
 
