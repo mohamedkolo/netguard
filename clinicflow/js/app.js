@@ -81,7 +81,9 @@ function applyTheme(mode) {
 /* ————————————————————————— التشغيل ————————————————————————— */
 
 async function boot() {
-  applyTheme(localStorage.getItem('clinicflow-theme') || 'light');
+  // لو المستخدم اختار وضع قبل كده نمشي عليه، وإلا نتبع إعداد الجهاز نفسه
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  applyTheme(localStorage.getItem('clinicflow-theme') || (prefersDark ? 'dark' : 'light'));
 
   $('#theme-toggle').addEventListener('click', () => {
     applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');

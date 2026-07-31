@@ -1,0 +1,3014 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClinicFlow — منصة إدارة العيادات</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+<style>
+/* ═══════════════════════════════════════════════
+   ClinicFlow — التنسيقات
+   ═══════════════════════════════════════════════ */
+
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --border: #e3e8f0;
+  --text: #16202e;
+  --text-2: #64748b;
+  --text-3: #94a3b8;
+
+  --brand: #0e9f8b;
+  --brand-dark: #0b8375;
+  --brand-soft: #e6f7f4;
+
+  --info: #2563eb;
+  --info-soft: #e8f0fe;
+  --ok: #15803d;
+  --ok-soft: #e6f6ec;
+  --warn: #b45309;
+  --warn-soft: #fdf2e3;
+  --danger: #dc2626;
+  --danger-soft: #fdeaea;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px rgba(16, 32, 56, .06);
+  --shadow-lg: 0 12px 48px rgba(16, 32, 56, .18);
+
+  --sidebar-w: 250px;
+  --font: 'Cairo', 'Segoe UI', Tahoma, 'Noto Sans Arabic', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0d1420;
+  --surface: #151e2d;
+  --surface-2: #1b2536;
+  --border: #263349;
+  --text: #e8eef7;
+  --text-2: #9aabc2;
+  --text-3: #6b7f99;
+
+  --brand: #2ec4ac;
+  --brand-dark: #24a894;
+  --brand-soft: #12312d;
+
+  --info: #60a5fa;
+  --info-soft: #16263f;
+  --ok: #4ade80;
+  --ok-soft: #12301f;
+  --warn: #fbbf24;
+  --warn-soft: #332512;
+  --danger: #f87171;
+  --danger-soft: #37191a;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, .55);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.is-locked { overflow: hidden; }
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+a { color: var(--brand-dark); text-decoration: none; }
+
+/* ═════════ التخطيط ═════════ */
+
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-inline-start: none;
+  border-inline-end: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.brand__mark {
+  font-size: 22px;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  background: var(--brand-soft);
+  border-radius: 10px;
+}
+.brand__text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.brand__text strong { font-size: 17px; letter-spacing: -.2px; }
+.brand__text small {
+  color: var(--text-2); font-size: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; flex: 1; overflow-y: auto; }
+.nav__item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-weight: 600; font-size: 14.5px;
+  transition: background .15s, color .15s;
+}
+.nav__item span { font-size: 17px; width: 22px; text-align: center; }
+.nav__item:hover { background: var(--surface-2); color: var(--text); }
+.nav__item.is-active { background: var(--brand-soft); color: var(--brand-dark); }
+
+.sidebar__foot { padding: 12px; border-top: 1px solid var(--border); }
+.theme-toggle {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px;
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 13.5px; font-weight: 600;
+}
+.theme-toggle:hover { color: var(--text); }
+.sidebar__note { font-size: 11.5px; color: var(--text-3); text-align: center; margin-top: 9px; }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 22px;
+  display: flex; align-items: center; gap: 14px;
+  min-height: 64px;
+}
+.topbar__title { font-size: 19px; font-weight: 700; flex: 1; letter-spacing: -.3px; }
+.topbar__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.topbar__menu { display: none; }
+
+.view { padding: 22px; flex: 1; }
+.loading { color: var(--text-2); padding: 40px; text-align: center; }
+
+.sidebar-scrim { display: none; }
+
+/* ═════════ أزرار ═════════ */
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 15px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 14px;
+  cursor: pointer;
+  transition: filter .15s, background .15s, border-color .15s;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.97); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.btn--primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn--primary:hover { background: var(--brand-dark); }
+.btn--danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn--ghost { background: transparent; }
+.btn--sm { padding: 6px 11px; font-size: 13px; }
+
+.icon-btn {
+  background: transparent; border: none; cursor: pointer;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  display: grid; place-items: center;
+  color: var(--text-2); font-size: 16px;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+/* ═════════ بطاقات ═════════ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card__head {
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.card__head h2 { font-size: 15.5px; font-weight: 700; flex: 1; }
+.card__body { padding: 18px; }
+
+.grid { display: grid; gap: 16px; }
+.grid--stats { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+/* بطاقة إحصائية */
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 17px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 14px;
+}
+.stat__icon {
+  width: 46px; height: 46px; flex-shrink: 0;
+  border-radius: 11px;
+  display: grid; place-items: center;
+  font-size: 21px;
+  background: var(--brand-soft);
+}
+.stat__num { font-size: 25px; font-weight: 800; line-height: 1.15; letter-spacing: -.5px; }
+.stat__label { color: var(--text-2); font-size: 13px; font-weight: 600; }
+
+/* ═════════ جداول ═════════ */
+
+.table-wrap { overflow-x: auto; }
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 560px;
+}
+table.data th {
+  text-align: start;
+  padding: 11px 14px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 700; font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.data td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+table.data tbody tr:last-child td { border-bottom: none; }
+table.data tbody tr:hover { background: var(--surface-2); }
+td.actions { white-space: nowrap; text-align: end; }
+td.num { font-variant-numeric: tabular-nums; }
+
+.cell-main { font-weight: 600; }
+.cell-sub { color: var(--text-2); font-size: 12.5px; }
+
+/* ═════════ شارات ═════════ */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.badge--info { background: var(--info-soft); color: var(--info); }
+.badge--ok { background: var(--ok-soft); color: var(--ok); }
+.badge--warn { background: var(--warn-soft); color: var(--warn); }
+.badge--danger { background: var(--danger-soft); color: var(--danger); }
+.badge--muted { background: var(--surface-2); color: var(--text-2); }
+
+/* ═════════ نماذج ═════════ */
+
+.field { display: block; margin-bottom: 14px; }
+.field__label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 6px; color: var(--text-2); }
+.field__hint { display: block; font-size: 12px; color: var(--text-3); margin-top: 5px; }
+
+input[type="text"], input[type="tel"], input[type="date"], input[type="time"],
+input[type="number"], input[type="email"], input[type="search"], select, textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+select { cursor: pointer; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.field-row--3 { grid-template-columns: repeat(3, 1fr); }
+
+.check { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; cursor: pointer; }
+.check input { width: 17px; height: 17px; accent-color: var(--brand); cursor: pointer; }
+
+/* شريط الأدوات فوق الجداول */
+.toolbar {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.toolbar .search { flex: 1; min-width: 200px; max-width: 380px; }
+
+/* ═════════ حالة فاضية ═════════ */
+
+.empty { text-align: center; padding: 52px 20px; color: var(--text-2); }
+.empty__icon { font-size: 42px; margin-bottom: 12px; opacity: .75; }
+.empty h3 { font-size: 16.5px; color: var(--text); margin-bottom: 6px; }
+.empty p { font-size: 14px; margin-bottom: 18px; }
+
+/* ═════════ نوافذ منبثقة ═════════ */
+
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(9, 16, 28, .55);
+  backdrop-filter: blur(3px);
+  display: grid; place-items: center;
+  padding: 18px;
+  animation: fade .16s ease;
+}
+@keyframes fade { from { opacity: 0 } }
+
+.modal {
+  background: var(--surface);
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 540px;
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  animation: pop .18s cubic-bezier(.2, .9, .3, 1.1);
+}
+@keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0 } }
+.modal--wide { max-width: 820px; }
+.modal--sm { max-width: 400px; }
+
+.modal__head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.modal__head h2 { font-size: 16.5px; font-weight: 700; flex: 1; }
+.modal__body { padding: 20px; overflow-y: auto; }
+.modal__foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-start; gap: 9px;
+  background: var(--surface-2);
+  border-radius: 0 0 15px 15px;
+}
+
+.confirm { text-align: center; padding: 28px 22px 8px; }
+.confirm__icon { font-size: 34px; margin-bottom: 10px; }
+.confirm p { color: var(--text-2); }
+
+/* ═════════ تنبيهات ═════════ */
+
+.toasts {
+  position: fixed; bottom: 20px; inset-inline-start: 20px;
+  z-index: 200;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-weight: 600; font-size: 14px;
+  color: #fff;
+  background: var(--ok);
+  transform: translateY(14px); opacity: 0;
+  transition: transform .22s, opacity .22s;
+  max-width: 360px;
+}
+.toast.is-in { transform: none; opacity: 1; }
+.toast--error { background: var(--danger); }
+.toast--warn { background: var(--warn); }
+.toast--info { background: var(--info); }
+
+/* ═════════ عناصر خاصة ═════════ */
+
+/* الرسم البياني البسيط في لوحة التحكم */
+.chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding-top: 10px; }
+.chart__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.chart__bar {
+  width: 100%; max-width: 42px;
+  background: linear-gradient(to top, var(--brand), color-mix(in srgb, var(--brand) 55%, transparent));
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  position: relative;
+  transition: filter .15s;
+}
+.chart__col:hover .chart__bar { filter: brightness(1.1); }
+.chart__val { font-size: 12px; font-weight: 700; }
+.chart__lbl { font-size: 11px; color: var(--text-2); white-space: nowrap; }
+
+/* بنود الفاتورة */
+.items-head, .item-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 100px 36px;
+  gap: 8px; align-items: center;
+}
+.items-head { font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: 7px; }
+.item-row { margin-bottom: 8px; }
+.item-row input { margin: 0; }
+
+.totals { border-top: 1px dashed var(--border); margin-top: 14px; padding-top: 12px; }
+.totals__row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+.totals__row strong { font-size: 16px; }
+
+/* السجل الطبي في صفحة المريض */
+.timeline { display: flex; flex-direction: column; gap: 12px; }
+.timeline__item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  background: var(--surface-2);
+}
+.timeline__head { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.timeline__date { font-weight: 700; font-size: 13.5px; }
+.timeline__body { font-size: 14px; }
+.timeline__body dt { color: var(--text-2); font-size: 12.5px; font-weight: 700; margin-top: 8px; }
+.timeline__body dd { margin-inline-start: 0; white-space: pre-wrap; }
+
+/* ═════════ الموبايل ═════════ */
+
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed; inset-block: 0; inset-inline-start: 0;
+    transform: translateX(100%);
+    transition: transform .22s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  [dir="ltr"] .sidebar { transform: translateX(-100%); }
+  .sidebar.is-open { transform: none; }
+
+  .sidebar-scrim {
+    display: block;
+    position: fixed; inset: 0; z-index: 39;
+    background: rgba(9, 16, 28, .5);
+    opacity: 0; pointer-events: none;
+    transition: opacity .22s;
+  }
+  .sidebar-scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .topbar__menu { display: grid; }
+  .topbar { padding: 12px 15px; }
+  .topbar__title { font-size: 17px; }
+  .view { padding: 15px; }
+
+  .field-row, .field-row--3 { grid-template-columns: 1fr; }
+  .items-head { display: none; }
+  .item-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .modal__foot { justify-content: stretch; }
+  .modal__foot .btn { flex: 1; justify-content: center; }
+}
+
+/* ═════════ الطباعة / PDF ═════════ */
+
+.print-area { display: none; }
+
+@media print {
+  body.is-printing .app,
+  body.is-printing .toasts { display: none !important; }
+
+  body.is-printing .print-area {
+    display: block;
+    padding: 0;
+    color: #000;
+    background: #fff;
+  }
+
+  body { background: #fff; }
+  @page { margin: 16mm; size: A4; }
+}
+
+.print-doc { font-family: var(--font); }
+.print-doc__title { font-size: 21px; margin-bottom: 4px; }
+.print-doc__foot {
+  margin-top: 26px; padding-top: 10px;
+  border-top: 1px solid #ccc;
+  font-size: 11px; color: #666; text-align: center;
+}
+.print-doc .p-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 16px;
+  gap: 16px; flex-wrap: wrap;
+}
+.print-doc .p-clinic { font-size: 17px; font-weight: 800; }
+.print-doc .p-meta { font-size: 12px; color: #444; }
+.print-doc table {
+  width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px;
+}
+.print-doc th, .print-doc td {
+  border: 1px solid #bbb; padding: 7px 9px; text-align: start;
+}
+.print-doc th { background: #f0f0f0; font-weight: 700; }
+.print-doc .p-section { margin-bottom: 18px; }
+.print-doc .p-section h3 {
+  font-size: 14px; margin-bottom: 7px;
+  background: #f0f0f0; padding: 5px 9px; border-radius: 4px;
+}
+.print-doc .p-totals { margin-inline-start: auto; width: 260px; font-size: 13.5px; }
+.print-doc .p-totals div { display: flex; justify-content: space-between; padding: 4px 0; }
+.print-doc .p-totals .p-grand {
+  border-top: 2px solid #222; margin-top: 5px; padding-top: 7px;
+  font-weight: 800; font-size: 15px;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+    <!-- ————— القائمة الجانبية ————— -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand__mark">🩺</span>
+        <span class="brand__text">
+          <strong>ClinicFlow</strong>
+          <small id="brand-clinic">إدارة العيادات</small>
+        </span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav__item" href="#/dashboard"><span>📊</span> لوحة التحكم</a>
+        <a class="nav__item" href="#/appointments"><span>📅</span> المواعيد</a>
+        <a class="nav__item" href="#/patients"><span>🧑‍🤝‍🧑</span> المرضى</a>
+        <a class="nav__item" href="#/records"><span>📋</span> السجلات الطبية</a>
+        <a class="nav__item" href="#/doctors"><span>👨‍⚕️</span> الأطباء</a>
+        <a class="nav__item" href="#/invoices"><span>🧾</span> الفواتير</a>
+        <a class="nav__item" href="#/reports"><span>📈</span> التقارير</a>
+        <a class="nav__item" href="#/settings"><span>⚙️</span> الإعدادات</a>
+      </nav>
+
+      <div class="sidebar__foot">
+        <button class="theme-toggle" id="theme-toggle" title="تبديل الوضع الليلي">🌙 الوضع الليلي</button>
+        <p class="sidebar__note">البيانات محفوظة على جهازك</p>
+      </div>
+    </aside>
+
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+    <!-- ————— المحتوى ————— -->
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn topbar__menu" id="menu-btn" aria-label="القائمة">☰</button>
+        <h1 class="topbar__title" id="page-title">لوحة التحكم</h1>
+        <div class="topbar__actions" id="page-actions"></div>
+      </header>
+
+      <main class="view" id="view">
+        <div class="loading">جارِ التحميل…</div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+  <div id="print-area" class="print-area"></div>
+
+<script>
+// الاتجاه من اليمين لليسار — مضبوط هنا عشان الملف يشتغل مدموج في أي صفحة
+document.documentElement.lang = 'ar';
+document.documentElement.dir = 'rtl';
+
+(function () {
+'use strict';
+
+/* ═══ js/db.js ═══ */
+/**
+ * طبقة التخزين — IndexedDB
+ *
+ * ده الملف الوحيد اللي بيلمس التخزين الفعلي. أي حاجة تانية في المشروع
+ * بتتعامل مع الكائن `db` اللي تحت بس. لو حبينا نحوّل لـ Supabase أو
+ * أي داتابيز على سيرفر، بنستبدل الملف ده وبس — باقي المشروع مايتغيرش.
+ */
+
+const DB_NAME = 'clinicflow';
+const DB_VERSION = 1;
+
+/** أسماء المخازن (الجداول) */
+const STORES = [
+  'patients',      // المرضى
+  'doctors',       // الأطباء
+  'appointments',  // المواعيد
+  'records',       // السجلات الطبية
+  'invoices',      // الفواتير
+  'services',      // الخدمات وأسعارها
+  'settings',      // إعدادات العيادة
+];
+
+let _dbPromise = null;
+
+function open() {
+  if (_dbPromise) return _dbPromise;
+
+  _dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = (e) => {
+      const idb = e.target.result;
+      for (const name of STORES) {
+        if (!idb.objectStoreNames.contains(name)) {
+          idb.createObjectStore(name, { keyPath: 'id' });
+        }
+      }
+    };
+
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+
+  return _dbPromise;
+}
+
+function tx(storeName, mode) {
+  return open().then((idb) => idb.transaction(storeName, mode).objectStore(storeName));
+}
+
+function wrap(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/** معرّف فريد بسيط — كفاية جدًا لتطبيق بيشتغل على جهاز واحد */
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+const db = {
+  /** كل الصفوف في مخزن */
+  async all(store) {
+    return wrap((await tx(store, 'readonly')).getAll());
+  },
+
+  /** صف واحد بالمعرّف، أو undefined */
+  async get(store, id) {
+    return wrap((await tx(store, 'readonly')).get(id));
+  },
+
+  /** إضافة أو تعديل. بيولّد id و createdAt لو مش موجودين */
+  async put(store, obj) {
+    const row = { ...obj };
+    if (!row.id) row.id = newId();
+    if (!row.createdAt) row.createdAt = new Date().toISOString();
+    row.updatedAt = new Date().toISOString();
+    await wrap((await tx(store, 'readwrite')).put(row));
+    return row;
+  },
+
+  /** إضافة/تعديل مجموعة صفوف مرة واحدة */
+  async putMany(store, rows) {
+    const out = [];
+    for (const r of rows) out.push(await this.put(store, r));
+    return out;
+  },
+
+  async remove(store, id) {
+    return wrap((await tx(store, 'readwrite')).delete(id));
+  },
+
+  async clear(store) {
+    return wrap((await tx(store, 'readwrite')).clear());
+  },
+
+  /** فلترة في الذاكرة — أحجام البيانات هنا صغيرة فده كفاية */
+  async where(store, predicate) {
+    return (await this.all(store)).filter(predicate);
+  },
+
+  async count(store) {
+    return wrap((await tx(store, 'readonly')).count());
+  },
+
+  /** نسخة احتياطية من كل المخازن */
+  async exportAll() {
+    const data = {};
+    for (const s of STORES) data[s] = await this.all(s);
+    return {
+      app: 'clinicflow',
+      version: DB_VERSION,
+      exportedAt: new Date().toISOString(),
+      data,
+    };
+  },
+
+  /**
+   * استرجاع نسخة احتياطية.
+   * @param {object} backup الملف المصدّر
+   * @param {boolean} replace لو true بيمسح الموجود الأول
+   */
+  async importAll(backup, replace = true) {
+    if (!backup || backup.app !== 'clinicflow' || !backup.data) {
+      throw new Error('الملف ده مش نسخة احتياطية صالحة من ClinicFlow');
+    }
+    for (const s of STORES) {
+      if (!Array.isArray(backup.data[s])) continue;
+      if (replace) await this.clear(s);
+      for (const row of backup.data[s]) {
+        await wrap((await tx(s, 'readwrite')).put(row));
+      }
+    }
+  },
+
+  /** مسح كل البيانات */
+  async wipe() {
+    for (const s of STORES) await this.clear(s);
+  },
+};
+
+
+/* ═══ js/ui.js ═══ */
+/**
+ * أدوات الواجهة المشتركة — نوافذ، تنبيهات، تنسيق، جداول
+ */
+
+/* ————————————————————————— تنسيق ————————————————————————— */
+
+const AR_MONTHS = [
+  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+];
+const AR_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+/** 2026-07-31 → 31 يوليو 2026 */
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  return `${d} ${AR_MONTHS[m - 1]} ${y}`;
+}
+
+/** 2026-07-31 → الجمعة */
+function fmtDay(iso) {
+  if (!iso) return '';
+  const dt = new Date(iso + 'T00:00:00');
+  return isNaN(dt) ? '' : AR_DAYS[dt.getDay()];
+}
+
+/** 14:30 → 2:30 م */
+function fmtTime(hhmm) {
+  if (!hhmm) return '—';
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h < 12 ? 'ص' : 'م';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+function fmtMoney(n, currency = 'ج.م') {
+  // أرقام لاتينية (1، 2، 3) عشان تبقى زي التواريخ والأوقات في باقي التطبيق —
+  // 'ar-EG' لوحدها بتطلع أرقام هندية (١، ٢، ٣) وبتبقى متضاربة مع باقي الأرقام
+  const num = (Number(n) || 0).toLocaleString('ar-EG-u-nu-latn', { maximumFractionDigits: 2 });
+  return `${num} ${currency}`;
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** بيحسب السن من تاريخ الميلاد */
+function age(birthDate) {
+  if (!birthDate) return null;
+  const b = new Date(birthDate);
+  if (isNaN(b)) return null;
+  const now = new Date();
+  let a = now.getFullYear() - b.getFullYear();
+  const mDiff = now.getMonth() - b.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && now.getDate() < b.getDate())) a--;
+  return a;
+}
+
+/** بيمنع حقن HTML من بيانات المستخدم */
+function esc(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+/* ————————————————————————— DOM ————————————————————————— */
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+/** بيبني عنصر من HTML نصّي */
+function h(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+
+/* ————————————————————————— تنبيهات ————————————————————————— */
+
+function toast(message, type = 'ok') {
+  const host = $('#toasts');
+  const node = h(`<div class="toast toast--${type}">${esc(message)}</div>`);
+  host.appendChild(node);
+  requestAnimationFrame(() => node.classList.add('is-in'));
+  setTimeout(() => {
+    node.classList.remove('is-in');
+    setTimeout(() => node.remove(), 250);
+  }, 3200);
+}
+
+/* ————————————————————————— نافذة منبثقة ————————————————————————— */
+
+/** مكدّس النوافذ — بيسمح بفتح نافذة جوه نافذة (مثلاً "مريض جديد" من جوه حجز موعد) */
+const _stack = [];
+
+/**
+ * بيفتح نافذة. بيرجّع Promise بينتهي لما النافذة تتقفل.
+ * @param {string} title العنوان
+ * @param {string} bodyHtml محتوى النافذة
+ * @param {object} opts { okLabel, wide, onOpen(node), onSubmit(form, node) }
+ *   onOpen بيتنادى فورًا بعد ما النافذة تظهر — استخدمه لربط أي أزرار جواها.
+ *   لو onSubmit رجّع false النافذة بتفضل مفتوحة.
+ */
+function modal(title, bodyHtml, opts = {}) {
+  const node = h(`
+    <div class="modal-backdrop">
+      <div class="modal ${opts.wide ? 'modal--wide' : ''}" role="dialog" aria-modal="true">
+        <header class="modal__head">
+          <h2>${esc(title)}</h2>
+          <button class="icon-btn" data-close aria-label="إغلاق">✕</button>
+        </header>
+        <form class="modal__body" novalidate>${bodyHtml}</form>
+        <footer class="modal__foot">
+          <button type="button" class="btn btn--ghost" data-close>إلغاء</button>
+          <button type="button" class="btn btn--primary" data-ok>${esc(opts.okLabel || 'حفظ')}</button>
+        </footer>
+      </div>
+    </div>
+  `);
+
+  // النوافذ المتداخلة لازم تبقى فوق اللي تحتها
+  node.style.zIndex = 100 + _stack.length * 10;
+  document.body.appendChild(node);
+  document.body.classList.add('is-locked');
+
+  return new Promise((resolve) => {
+    const close = () => {
+      const i = _stack.indexOf(entry);
+      if (i === -1) return;
+      _stack.splice(i, 1);
+      node.remove();
+      document.removeEventListener('keydown', onKey);
+      if (!_stack.length) document.body.classList.remove('is-locked');
+      resolve();
+    };
+
+    const onKey = (e) => {
+      // Escape بيقفل النافذة اللي فوق خالص بس
+      if (e.key === 'Escape' && _stack[_stack.length - 1] === entry) close();
+    };
+
+    const entry = { node, close };
+    _stack.push(entry);
+    document.addEventListener('keydown', onKey);
+
+    node.addEventListener('click', (e) => {
+      if (e.target === node || e.target.closest('[data-close]')) close();
+    });
+
+    const submit = async () => {
+      const form = node.querySelector('form');
+      const okBtn = node.querySelector('[data-ok]');
+      okBtn.disabled = true;
+      try {
+        const done = await opts.onSubmit?.(form, node);
+        if (done !== false) close();
+        else okBtn.disabled = false;
+      } catch (err) {
+        toast(err.message || 'حصل خطأ', 'error');
+        okBtn.disabled = false;
+      }
+    };
+
+    node.querySelector('[data-ok]').addEventListener('click', submit);
+    node.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submit();
+    });
+
+    // الربط بيحصل والنافذة مفتوحة، مش بعد ما تتقفل
+    opts.onOpen?.(node);
+    node.querySelector('input, select, textarea')?.focus();
+  });
+}
+
+/** بيقفل النافذة اللي فوق خالص */
+function closeModal() {
+  _stack[_stack.length - 1]?.close();
+}
+
+/** تأكيد قبل حذف — بيرجّع true/false */
+function confirmBox(message, okLabel = 'احذف') {
+  return new Promise((resolve) => {
+    const node = h(`
+      <div class="modal-backdrop">
+        <div class="modal modal--sm" role="dialog" aria-modal="true">
+          <div class="modal__body confirm">
+            <div class="confirm__icon">⚠️</div>
+            <p>${esc(message)}</p>
+          </div>
+          <footer class="modal__foot">
+            <button class="btn btn--ghost" data-no>تراجع</button>
+            <button class="btn btn--danger" data-yes>${esc(okLabel)}</button>
+          </footer>
+        </div>
+      </div>
+    `);
+    document.body.appendChild(node);
+    document.body.classList.add('is-locked');
+
+    const done = (val) => {
+      node.remove();
+      document.body.classList.remove('is-locked');
+      resolve(val);
+    };
+    node.querySelector('[data-yes]').onclick = () => done(true);
+    node.querySelector('[data-no]').onclick = () => done(false);
+    node.onclick = (e) => { if (e.target === node) done(false); };
+  });
+}
+
+/* ————————————————————————— نماذج ————————————————————————— */
+
+/** بيقرا كل حقول الفورم في كائن */
+function formData(form) {
+  const out = {};
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    out[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+  }
+  return out;
+}
+
+function field(label, inputHtml, hint = '') {
+  return `
+    <label class="field">
+      <span class="field__label">${esc(label)}</span>
+      ${inputHtml}
+      ${hint ? `<span class="field__hint">${esc(hint)}</span>` : ''}
+    </label>`;
+}
+
+function options(list, valueKey, labelFn, selected) {
+  return list
+    .map((it) => {
+      const v = it[valueKey];
+      return `<option value="${esc(v)}" ${v === selected ? 'selected' : ''}>${esc(labelFn(it))}</option>`;
+    })
+    .join('');
+}
+
+/* ————————————————————————— حالة فاضية ————————————————————————— */
+
+function empty(icon, title, hint = '', actionHtml = '') {
+  return `
+    <div class="empty">
+      <div class="empty__icon">${icon}</div>
+      <h3>${esc(title)}</h3>
+      ${hint ? `<p>${esc(hint)}</p>` : ''}
+      ${actionHtml}
+    </div>`;
+}
+
+/* ————————————————————————— طباعة / PDF ————————————————————————— */
+
+/**
+ * بيجهّز محتوى للطباعة وبيفتح نافذة الطباعة.
+ * المتصفح نفسه بيدي خيار "حفظ كـ PDF" — وده أحسن من مكتبات PDF
+ * لأنه بيتعامل مع العربي والاتجاه من اليمين لليسار صح ١٠٠٪.
+ */
+function printView(title, bodyHtml) {
+  const host = $('#print-area');
+  host.innerHTML = `
+    <div class="print-doc">
+      <h1 class="print-doc__title">${esc(title)}</h1>
+      ${bodyHtml}
+      <div class="print-doc__foot">
+        طُبع في ${fmtDate(today())} — ClinicFlow
+      </div>
+    </div>`;
+  document.body.classList.add('is-printing');
+
+  const cleanup = () => {
+    document.body.classList.remove('is-printing');
+    host.innerHTML = '';
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+
+  setTimeout(() => window.print(), 80);
+}
+
+
+/* ═══ js/store.js ═══ */
+/**
+ * طبقة المنطق — الكيانات والعلاقات بينها
+ *
+ * الملف ده بيتعامل مع db.js بس، ومش عارف حاجة عن IndexedDB نفسها.
+ * كل الصفحات بتستخدم الدوال اللي هنا، مش db مباشرة.
+ */
+
+/* ————————————————————————— الإعدادات ————————————————————————— */
+
+const DEFAULT_SETTINGS = {
+  id: 'clinic',
+  clinicName: 'عيادة النور التخصصية',
+  phone: '01000000000',
+  address: 'القاهرة، مصر',
+  currency: 'ج.م',
+  workStart: '09:00',
+  workEnd: '21:00',
+  slotMinutes: 30,
+};
+
+const settings = {
+  async get() {
+    const s = await db.get('settings', 'clinic');
+    return { ...DEFAULT_SETTINGS, ...(s || {}) };
+  },
+  async save(patch) {
+    const current = await this.get();
+    return db.put('settings', { ...current, ...patch, id: 'clinic' });
+  },
+};
+
+/* ————————————————————————— المرضى ————————————————————————— */
+
+const patients = {
+  all: () => db.all('patients'),
+  get: (id) => db.get('patients', id),
+
+  async save(p) {
+    if (!p.name || !p.name.trim()) throw new Error('اسم المريض مطلوب');
+    if (!p.phone || !p.phone.trim()) throw new Error('رقم التليفون مطلوب');
+    return db.put('patients', {
+      ...p,
+      name: p.name.trim(),
+      phone: p.phone.trim(),
+    });
+  },
+
+  /** بيمسح المريض وكل اللي متعلق بيه */
+  async remove(id) {
+    for (const a of await db.where('appointments', (x) => x.patientId === id)) {
+      await db.remove('appointments', a.id);
+    }
+    for (const r of await db.where('records', (x) => x.patientId === id)) {
+      await db.remove('records', r.id);
+    }
+    for (const i of await db.where('invoices', (x) => x.patientId === id)) {
+      await db.remove('invoices', i.id);
+    }
+    return db.remove('patients', id);
+  },
+
+  /** بحث بالاسم أو التليفون */
+  async search(q) {
+    const list = await this.all();
+    if (!q || !q.trim()) return list;
+    const term = q.trim().toLowerCase();
+    return list.filter(
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        (p.phone || '').includes(term) ||
+        (p.nationalId || '').includes(term)
+    );
+  },
+};
+
+/* ————————————————————————— الأطباء ————————————————————————— */
+
+const doctors = {
+  all: () => db.all('doctors'),
+  get: (id) => db.get('doctors', id),
+  active: () => db.where('doctors', (d) => d.active !== false),
+
+  async save(d) {
+    if (!d.name || !d.name.trim()) throw new Error('اسم الطبيب مطلوب');
+    if (!d.specialty || !d.specialty.trim()) throw new Error('التخصص مطلوب');
+    return db.put('doctors', {
+      ...d,
+      name: d.name.trim(),
+      specialty: d.specialty.trim(),
+      fee: Number(d.fee) || 0,
+      active: d.active !== false,
+    });
+  },
+
+  /** الطبيب مش بيتمسح لو عليه مواعيد — بيتعطّل بس */
+  async remove(id) {
+    const linked = await db.where('appointments', (a) => a.doctorId === id);
+    if (linked.length) {
+      throw new Error(
+        `مينفعش تمسح الطبيب ده — عليه ${linked.length} موعد. تقدر توقفه من "نشط" بدل ما تمسحه.`
+      );
+    }
+    return db.remove('doctors', id);
+  },
+};
+
+/* ————————————————————————— المواعيد ————————————————————————— */
+
+const APPOINTMENT_STATUS = {
+  scheduled: { label: 'محجوز', tone: 'info' },
+  done: { label: 'تم الكشف', tone: 'ok' },
+  cancelled: { label: 'ملغي', tone: 'muted' },
+  noshow: { label: 'لم يحضر', tone: 'warn' },
+};
+
+const appointments = {
+  all: () => db.all('appointments'),
+  get: (id) => db.get('appointments', id),
+
+  async save(a) {
+    if (!a.patientId) throw new Error('اختار المريض');
+    if (!a.doctorId) throw new Error('اختار الطبيب');
+    if (!a.date) throw new Error('اختار التاريخ');
+    if (!a.time) throw new Error('اختار الوقت');
+
+    // منع حجز نفس الطبيب في نفس التوقيت مرتين
+    const clash = (await db.where('appointments', (x) =>
+      x.doctorId === a.doctorId &&
+      x.date === a.date &&
+      x.time === a.time &&
+      x.status !== 'cancelled' &&
+      x.id !== a.id
+    ))[0];
+    if (clash) throw new Error('الطبيب محجوز في الميعاد ده بالفعل');
+
+    return db.put('appointments', { ...a, status: a.status || 'scheduled' });
+  },
+
+  remove: (id) => db.remove('appointments', id),
+
+  byDate: (date) => db.where('appointments', (a) => a.date === date),
+  byPatient: (patientId) => db.where('appointments', (a) => a.patientId === patientId),
+  byDoctor: (doctorId) => db.where('appointments', (a) => a.doctorId === doctorId),
+
+  /** المواعيد مع بيانات المريض والطبيب جاهزة للعرض */
+  async detailed(filterFn) {
+    const [list, pats, docs] = await Promise.all([
+      this.all(),
+      patients.all(),
+      doctors.all(),
+    ]);
+    const pMap = Object.fromEntries(pats.map((p) => [p.id, p]));
+    const dMap = Object.fromEntries(docs.map((d) => [d.id, d]));
+    return list
+      .filter(filterFn || (() => true))
+      .map((a) => ({
+        ...a,
+        patient: pMap[a.patientId] || null,
+        doctor: dMap[a.doctorId] || null,
+      }))
+      .sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
+  },
+};
+
+/* ————————————————————————— السجلات الطبية ————————————————————————— */
+
+const records = {
+  all: () => db.all('records'),
+  get: (id) => db.get('records', id),
+  byPatient: (patientId) => db.where('records', (r) => r.patientId === patientId),
+
+  async save(r) {
+    if (!r.patientId) throw new Error('اختار المريض');
+    if (!r.diagnosis || !r.diagnosis.trim()) throw new Error('التشخيص مطلوب');
+    return db.put('records', {
+      ...r,
+      date: r.date || new Date().toISOString().slice(0, 10),
+      diagnosis: r.diagnosis.trim(),
+    });
+  },
+
+  remove: (id) => db.remove('records', id),
+};
+
+/* ————————————————————————— الخدمات ————————————————————————— */
+
+const services = {
+  all: () => db.all('services'),
+  async save(s) {
+    if (!s.name || !s.name.trim()) throw new Error('اسم الخدمة مطلوب');
+    return db.put('services', { ...s, name: s.name.trim(), price: Number(s.price) || 0 });
+  },
+  remove: (id) => db.remove('services', id),
+};
+
+/* ————————————————————————— الفواتير ————————————————————————— */
+
+const invoices = {
+  all: () => db.all('invoices'),
+  get: (id) => db.get('invoices', id),
+  byPatient: (patientId) => db.where('invoices', (i) => i.patientId === patientId),
+
+  async save(inv) {
+    if (!inv.patientId) throw new Error('اختار المريض');
+    const items = (inv.items || []).filter((it) => it.name && it.name.trim());
+    if (!items.length) throw new Error('ضيف بند واحد على الأقل في الفاتورة');
+
+    const total = items.reduce(
+      (sum, it) => sum + (Number(it.price) || 0) * (Number(it.qty) || 1),
+      0
+    );
+    const discount = Number(inv.discount) || 0;
+    const net = Math.max(0, total - discount);
+    const paid = Number(inv.paid) || 0;
+
+    return db.put('invoices', {
+      ...inv,
+      items,
+      total,
+      discount,
+      net,
+      paid,
+      due: Math.max(0, net - paid),
+      status: paid >= net ? 'paid' : paid > 0 ? 'partial' : 'unpaid',
+      date: inv.date || new Date().toISOString().slice(0, 10),
+      number: inv.number || `INV-${newId().slice(-6).toUpperCase()}`,
+    });
+  },
+
+  remove: (id) => db.remove('invoices', id),
+};
+
+/* ————————————————————————— إحصائيات لوحة التحكم ————————————————————————— */
+
+const stats = {
+  async dashboard() {
+    const today = new Date().toISOString().slice(0, 10);
+    const [pats, docs, appts, invs] = await Promise.all([
+      patients.all(),
+      doctors.all(),
+      appointments.all(),
+      invoices.all(),
+    ]);
+
+    const todays = appts.filter((a) => a.date === today);
+    const monthPrefix = today.slice(0, 7);
+    const monthInvoices = invs.filter((i) => (i.date || '').startsWith(monthPrefix));
+
+    return {
+      patients: pats.length,
+      doctors: docs.filter((d) => d.active !== false).length,
+      todayAppointments: todays.length,
+      todayPending: todays.filter((a) => a.status === 'scheduled').length,
+      monthRevenue: monthInvoices.reduce((s, i) => s + (i.paid || 0), 0),
+      monthDue: invs.reduce((s, i) => s + (i.due || 0), 0),
+      /** آخر 7 أيام: عدد المواعيد في كل يوم */
+      week: Array.from({ length: 7 }, (_, k) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - k));
+        const iso = d.toISOString().slice(0, 10);
+        return { date: iso, count: appts.filter((a) => a.date === iso).length };
+      }),
+    };
+  },
+};
+
+
+/* ═══ js/seed.js ═══ */
+/**
+ * بيانات تجريبية — بتتحط مرة واحدة بس أول ما التطبيق يفتح على جهاز فاضي.
+ * تقدر تمسحها كلها من صفحة الإعدادات.
+ */
+
+
+const FLAG = 'clinicflow-seeded';
+
+function dayOffset(n) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+async function ensureSeed() {
+  // نتأكد إن الداتابيز فاضية فعلًا، مش بس نعتمد على العلامة في localStorage
+  const existing = await db.count('patients');
+  if (existing > 0 || localStorage.getItem(FLAG)) {
+    localStorage.setItem(FLAG, '1');
+    await settings.get();
+    return false;
+  }
+
+  await settings.save({});
+
+  const docs = await db.putMany('doctors', [
+    { id: 'd1', name: 'د. أحمد سليم', specialty: 'باطنة', phone: '01001234567', fee: 250, active: true },
+    { id: 'd2', name: 'د. منى عبد الرحمن', specialty: 'أطفال', phone: '01112345678', fee: 200, active: true },
+    { id: 'd3', name: 'د. كريم فؤاد', specialty: 'عظام', phone: '01223456789', fee: 300, active: true },
+  ]);
+
+  const pats = await db.putMany('patients', [
+    { id: 'p1', name: 'محمود عبد الله', phone: '01011112222', gender: 'male', birthDate: '1988-04-12', address: 'مدينة نصر، القاهرة', bloodType: 'O+', allergies: 'حساسية من البنسلين' },
+    { id: 'p2', name: 'سارة إبراهيم', phone: '01122223333', gender: 'female', birthDate: '1995-11-03', address: 'المعادي، القاهرة', bloodType: 'A+', allergies: '' },
+    { id: 'p3', name: 'يوسف طارق', phone: '01233334444', gender: 'male', birthDate: '2018-06-21', address: 'الشيخ زايد، الجيزة', bloodType: 'B+', allergies: '' },
+    { id: 'p4', name: 'نادية حسن', phone: '01044445555', gender: 'female', birthDate: '1962-02-17', address: 'شبرا، القاهرة', bloodType: 'AB-', allergies: 'حساسية من الأسبرين' },
+  ]);
+
+  await db.putMany('services', [
+    { name: 'كشف', price: 250 },
+    { name: 'استشارة', price: 150 },
+    { name: 'متابعة', price: 100 },
+    { name: 'تحاليل دم شاملة', price: 400 },
+    { name: 'أشعة سينية', price: 350 },
+    { name: 'جلسة علاج طبيعي', price: 200 },
+  ]);
+
+  await db.putMany('appointments', [
+    { patientId: 'p1', doctorId: 'd1', date: dayOffset(0), time: '10:00', reason: 'ألم في المعدة', status: 'done' },
+    { patientId: 'p2', doctorId: 'd1', date: dayOffset(0), time: '11:30', reason: 'متابعة تحاليل', status: 'scheduled' },
+    { patientId: 'p3', doctorId: 'd2', date: dayOffset(0), time: '13:00', reason: 'كشف دوري', status: 'scheduled' },
+    { patientId: 'p4', doctorId: 'd3', date: dayOffset(1), time: '10:30', reason: 'ألم في الركبة', status: 'scheduled' },
+    { patientId: 'p1', doctorId: 'd1', date: dayOffset(-3), time: '12:00', reason: 'كشف أول', status: 'done' },
+    { patientId: 'p2', doctorId: 'd2', date: dayOffset(-1), time: '09:30', reason: 'برد وسخونية', status: 'done' },
+    { patientId: 'p4', doctorId: 'd3', date: dayOffset(-5), time: '16:00', reason: 'استشارة', status: 'cancelled' },
+  ]);
+
+  await db.putMany('records', [
+    {
+      patientId: 'p1', doctorId: 'd1', date: dayOffset(-3),
+      symptoms: 'ألم بالمعدة بعد الأكل، حموضة متكررة',
+      diagnosis: 'التهاب في جدار المعدة',
+      prescription: 'أوميبرازول ٢٠ مجم — قرص قبل الفطار لمدة ١٤ يوم\nمضاد للحموضة عند اللزوم',
+      notes: 'يتجنب الأكل الحار والقهوة. متابعة بعد أسبوعين.',
+    },
+    {
+      patientId: 'p2', doctorId: 'd2', date: dayOffset(-1),
+      symptoms: 'سخونية ٣٨.٥، كحة جافة، إرهاق',
+      diagnosis: 'التهاب فيروسي في الجهاز التنفسي العلوي',
+      prescription: 'باراسيتامول ٥٠٠ مجم كل ٨ ساعات\nشراب مهدئ للكحة',
+      notes: 'راحة وسوائل. لو السخونية استمرت أكتر من ٣ أيام تعمل تحاليل.',
+    },
+  ]);
+
+  await db.putMany('invoices', [
+    {
+      patientId: 'p1', date: dayOffset(-3), number: 'INV-000101',
+      items: [{ name: 'كشف', qty: 1, price: 250 }, { name: 'تحاليل دم شاملة', qty: 1, price: 400 }],
+      total: 650, discount: 50, net: 600, paid: 600, due: 0, status: 'paid', method: 'cash',
+    },
+    {
+      patientId: 'p2', date: dayOffset(-1), number: 'INV-000102',
+      items: [{ name: 'كشف', qty: 1, price: 200 }],
+      total: 200, discount: 0, net: 200, paid: 100, due: 100, status: 'partial', method: 'cash',
+    },
+  ]);
+
+  localStorage.setItem(FLAG, '1');
+  return { doctors: docs.length, patients: pats.length };
+}
+
+/** بيسمح بإعادة إدخال البيانات التجريبية بعد المسح */
+function resetSeedFlag() {
+  localStorage.removeItem(FLAG);
+}
+
+
+/* ═══ js/pages/dashboard.js ═══ */
+/** لوحة التحكم — نظرة سريعة على حال العيادة النهاردة */
+
+
+function statCard(icon, num, label, tone = 'brand') {
+  return `
+    <div class="stat">
+      <div class="stat__icon" style="background:var(--${tone}-soft)">${icon}</div>
+      <div>
+        <div class="stat__num">${esc(num)}</div>
+        <div class="stat__label">${esc(label)}</div>
+      </div>
+    </div>`;
+}
+
+const dashboard = {
+  async render(view) {
+    const [s, cfg, todays] = await Promise.all([
+      stats.dashboard(),
+      settings.get(),
+      appointments.detailed((a) => a.date === today()),
+    ]);
+
+    const maxWeek = Math.max(1, ...s.week.map((w) => w.count));
+
+    const rows = todays
+      .map((a) => {
+        const st = APPOINTMENT_STATUS[a.status] || APPOINTMENT_STATUS.scheduled;
+        return `
+          <tr>
+            <td class="num">${fmtTime(a.time)}</td>
+            <td>
+              <div class="cell-main">${esc(a.patient?.name || 'مريض محذوف')}</div>
+              <div class="cell-sub">${esc(a.reason || '—')}</div>
+            </td>
+            <td>${esc(a.doctor?.name || '—')}</td>
+            <td><span class="badge badge--${st.tone}">${st.label}</span></td>
+          </tr>`;
+      })
+      .join('');
+
+    view.innerHTML = `
+      <div class="grid grid--stats" style="margin-bottom:18px">
+        ${statCard('📅', s.todayAppointments, 'مواعيد النهاردة', 'info')}
+        ${statCard('⏳', s.todayPending, 'في انتظار الكشف', 'warn')}
+        ${statCard('🧑‍🤝‍🧑', s.patients, 'إجمالي المرضى', 'brand')}
+        ${statCard('👨‍⚕️', s.doctors, 'أطباء نشطين', 'ok')}
+      </div>
+
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__head"><h2>مواعيد النهاردة — ${esc(fmtDay(today()))}</h2>
+            <a class="btn btn--sm" href="#/appointments">عرض الكل</a>
+          </div>
+          ${
+            todays.length
+              ? `<div class="table-wrap"><table class="data">
+                  <thead><tr><th>الوقت</th><th>المريض</th><th>الطبيب</th><th>الحالة</th></tr></thead>
+                  <tbody>${rows}</tbody></table></div>`
+              : empty('🗓️', 'مفيش مواعيد النهاردة', 'ابدأ بحجز موعد جديد من صفحة المواعيد.',
+                  '<a class="btn btn--primary" href="#/appointments">احجز موعد</a>')
+          }
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card__head"><h2>الحساب</h2></div>
+            <div class="card__body" style="display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div class="stat__label">محصّل الشهر ده</div>
+                <div class="stat__num" style="color:var(--ok)">${esc(fmtMoney(s.monthRevenue, cfg.currency))}</div>
+              </div>
+              <div>
+                <div class="stat__label">مستحقات لسه متحصّلتش</div>
+                <div class="stat__num" style="color:var(--warn)">${esc(fmtMoney(s.monthDue, cfg.currency))}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><h2>المواعيد آخر ٧ أيام</h2></div>
+            <div class="card__body">
+              <div class="chart">
+                ${s.week
+                  .map(
+                    (w) => `
+                  <div class="chart__col" title="${esc(w.date)}">
+                    <span class="chart__val">${w.count}</span>
+                    <div class="chart__bar" style="height:${(w.count / maxWeek) * 100}%"></div>
+                    <span class="chart__lbl">${esc(fmtDay(w.date).replace('ال', ''))}</span>
+                  </div>`
+                  )
+                  .join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+};
+
+
+/* ═══ js/pages/patients.js ═══ */
+/** المرضى — قائمة، إضافة/تعديل، وملف المريض الكامل */
+
+
+const GENDER = { male: 'ذكر', female: 'أنثى' };
+
+/* ————————————————————————— فورم المريض ————————————————————————— */
+
+async function patientForm(existing = null) {
+  const p = existing || {};
+  const isEdit = !!existing;
+
+  let saved = null;
+  await modal(
+    isEdit ? 'تعديل بيانات المريض' : 'مريض جديد',
+    `
+    ${field('الاسم بالكامل *', `<input type="text" name="name" value="${esc(p.name || '')}" required>`)}
+    <div class="field-row">
+      ${field('رقم التليفون *', `<input type="tel" name="phone" value="${esc(p.phone || '')}" required>`)}
+      ${field('الرقم القومي', `<input type="text" name="nationalId" value="${esc(p.nationalId || '')}">`)}
+    </div>
+    <div class="field-row">
+      ${field('النوع', `<select name="gender">
+        <option value="male" ${p.gender === 'male' ? 'selected' : ''}>ذكر</option>
+        <option value="female" ${p.gender === 'female' ? 'selected' : ''}>أنثى</option>
+      </select>`)}
+      ${field('تاريخ الميلاد', `<input type="date" name="birthDate" value="${esc(p.birthDate || '')}">`)}
+    </div>
+    <div class="field-row">
+      ${field('فصيلة الدم', `<select name="bloodType">
+        ${['', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+          .map((b) => `<option value="${b}" ${p.bloodType === b ? 'selected' : ''}>${b || '— غير محدد —'}</option>`)
+          .join('')}
+      </select>`)}
+      ${field('العنوان', `<input type="text" name="address" value="${esc(p.address || '')}">`)}
+    </div>
+    ${field('حساسية أو تحذيرات طبية', `<textarea name="allergies" placeholder="مثلاً: حساسية من البنسلين">${esc(p.allergies || '')}</textarea>`,
+      'بيظهر تحذير أحمر في ملف المريض لو كتبت هنا حاجة')}
+    ${field('ملاحظات', `<textarea name="notes">${esc(p.notes || '')}</textarea>`)}
+    `,
+    {
+      okLabel: isEdit ? 'حفظ التعديلات' : 'إضافة المريض',
+      async onSubmit(form) {
+        saved = await patients.save({ ...p, ...formData(form) });
+        toast(isEdit ? 'اتحفظت التعديلات' : 'تمت إضافة المريض');
+      },
+    }
+  );
+  return saved;
+}
+
+/* ————————————————————————— ملف المريض ————————————————————————— */
+
+async function renderProfile(view, id, reload) {
+  const p = await patients.get(id);
+  if (!p) {
+    view.innerHTML = empty('🔍', 'المريض ده مش موجود', '', '<a class="btn btn--primary" href="#/patients">رجوع للمرضى</a>');
+    return;
+  }
+
+  const [appts, recs, invs, docs, cfg] = await Promise.all([
+    appointments.byPatient(id),
+    records.byPatient(id),
+    invoices.byPatient(id),
+    doctors.all(),
+    settings.get(),
+  ]);
+  const dMap = Object.fromEntries(docs.map((d) => [d.id, d]));
+
+  const a = age(p.birthDate);
+  const totalDue = invs.reduce((s, i) => s + (i.due || 0), 0);
+
+  view.innerHTML = `
+    <a class="btn btn--sm btn--ghost" href="#/patients" style="margin-bottom:14px">→ كل المرضى</a>
+
+    ${p.allergies ? `<div class="card" style="border-color:var(--danger);margin-bottom:16px">
+      <div class="card__body" style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:20px">⚠️</span>
+        <div><strong style="color:var(--danger)">تحذير طبي:</strong> ${esc(p.allergies)}</div>
+      </div></div>` : ''}
+
+    <div class="grid grid--2">
+      <div class="card">
+        <div class="card__head">
+          <h2>${esc(p.name)}</h2>
+          <button class="btn btn--sm" data-edit>تعديل</button>
+          <button class="btn btn--sm" data-print>🖨️ طباعة الملف</button>
+        </div>
+        <div class="card__body">
+          <table class="data" style="min-width:0">
+            <tbody>
+              <tr><th style="width:130px">التليفون</th><td>${esc(p.phone)}</td></tr>
+              <tr><th>السن</th><td>${a !== null ? esc(a) + ' سنة' : '—'}</td></tr>
+              <tr><th>النوع</th><td>${esc(GENDER[p.gender] || '—')}</td></tr>
+              <tr><th>فصيلة الدم</th><td>${esc(p.bloodType || '—')}</td></tr>
+              <tr><th>العنوان</th><td>${esc(p.address || '—')}</td></tr>
+              <tr><th>الرقم القومي</th><td>${esc(p.nationalId || '—')}</td></tr>
+              <tr><th>ملاحظات</th><td>${esc(p.notes || '—')}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="grid grid--stats">
+          <div class="stat"><div class="stat__icon">📅</div>
+            <div><div class="stat__num">${appts.length}</div><div class="stat__label">موعد</div></div></div>
+          <div class="stat"><div class="stat__icon" style="background:var(--warn-soft)">💰</div>
+            <div><div class="stat__num" style="font-size:19px">${esc(fmtMoney(totalDue, cfg.currency))}</div>
+            <div class="stat__label">مستحق عليه</div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h2>المواعيد</h2></div>
+          ${appts.length ? `<div class="table-wrap"><table class="data" style="min-width:0">
+            <tbody>${appts
+              .sort((x, y) => (y.date + y.time).localeCompare(x.date + x.time))
+              .map((ap) => {
+                const st = APPOINTMENT_STATUS[ap.status] || APPOINTMENT_STATUS.scheduled;
+                return `<tr>
+                  <td>${esc(fmtDate(ap.date))}<div class="cell-sub">${esc(fmtTime(ap.time))}</div></td>
+                  <td>${esc(dMap[ap.doctorId]?.name || '—')}<div class="cell-sub">${esc(ap.reason || '')}</div></td>
+                  <td><span class="badge badge--${st.tone}">${st.label}</span></td>
+                </tr>`;
+              })
+              .join('')}</tbody></table></div>`
+            : '<div class="card__body cell-sub">مفيش مواعيد مسجّلة.</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card__head"><h2>السجل الطبي (${recs.length})</h2>
+        <a class="btn btn--sm btn--primary" href="#/records">إضافة سجل</a>
+      </div>
+      <div class="card__body">
+        ${recs.length ? `<div class="timeline">${recs
+          .sort((x, y) => (y.date || '').localeCompare(x.date || ''))
+          .map((r) => `
+            <div class="timeline__item">
+              <div class="timeline__head">
+                <span class="timeline__date">${esc(fmtDate(r.date))}</span>
+                <span class="badge badge--muted">${esc(dMap[r.doctorId]?.name || 'طبيب غير محدد')}</span>
+              </div>
+              <dl class="timeline__body">
+                ${r.symptoms ? `<dt>الأعراض</dt><dd>${esc(r.symptoms)}</dd>` : ''}
+                <dt>التشخيص</dt><dd>${esc(r.diagnosis)}</dd>
+                ${r.prescription ? `<dt>الروشتة</dt><dd>${esc(r.prescription)}</dd>` : ''}
+                ${r.notes ? `<dt>ملاحظات</dt><dd>${esc(r.notes)}</dd>` : ''}
+              </dl>
+            </div>`).join('')}</div>`
+          : '<div class="cell-sub">مفيش سجلات طبية لسه.</div>'}
+      </div>
+    </div>`;
+
+  view.querySelector('[data-edit]').onclick = async () => {
+    if (await patientForm(p)) reload();
+  };
+
+  view.querySelector('[data-print]').onclick = () => {
+    printView(
+      `الملف الطبي — ${p.name}`,
+      `
+      <div class="p-head">
+        <div><div class="p-clinic">${esc(cfg.clinicName)}</div>
+          <div class="p-meta">${esc(cfg.phone)} — ${esc(cfg.address)}</div></div>
+        <div class="p-meta">تاريخ الطباعة: ${esc(fmtDate(today()))}</div>
+      </div>
+
+      <div class="p-section">
+        <h3>بيانات المريض</h3>
+        <table><tbody>
+          <tr><th style="width:130px">الاسم</th><td>${esc(p.name)}</td>
+              <th style="width:90px">التليفون</th><td>${esc(p.phone)}</td></tr>
+          <tr><th>السن</th><td>${a !== null ? esc(a) + ' سنة' : '—'}</td>
+              <th>فصيلة الدم</th><td>${esc(p.bloodType || '—')}</td></tr>
+          <tr><th>النوع</th><td>${esc(GENDER[p.gender] || '—')}</td>
+              <th>العنوان</th><td>${esc(p.address || '—')}</td></tr>
+          ${p.allergies ? `<tr><th>تحذيرات</th><td colspan="3"><strong>${esc(p.allergies)}</strong></td></tr>` : ''}
+        </tbody></table>
+      </div>
+
+      <div class="p-section">
+        <h3>السجل الطبي</h3>
+        ${recs.length ? recs
+          .sort((x, y) => (y.date || '').localeCompare(x.date || ''))
+          .map((r) => `
+            <table><tbody>
+              <tr><th style="width:110px">التاريخ</th><td>${esc(fmtDate(r.date))}</td>
+                  <th style="width:90px">الطبيب</th><td>${esc(dMap[r.doctorId]?.name || '—')}</td></tr>
+              ${r.symptoms ? `<tr><th>الأعراض</th><td colspan="3">${esc(r.symptoms)}</td></tr>` : ''}
+              <tr><th>التشخيص</th><td colspan="3">${esc(r.diagnosis)}</td></tr>
+              ${r.prescription ? `<tr><th>الروشتة</th><td colspan="3" style="white-space:pre-wrap">${esc(r.prescription)}</td></tr>` : ''}
+              ${r.notes ? `<tr><th>ملاحظات</th><td colspan="3">${esc(r.notes)}</td></tr>` : ''}
+            </tbody></table>`).join('')
+          : '<p>لا توجد سجلات.</p>'}
+      </div>`
+    );
+  };
+}
+
+/* ————————————————————————— القائمة ————————————————————————— */
+
+const patientsPage = {
+  async render(view, { param, actions, reload }) {
+    if (param) return renderProfile(view, param, reload);
+
+    const addBtn = h('<button class="btn btn--primary">+ مريض جديد</button>');
+    addBtn.onclick = async () => { if (await patientForm()) reload(); };
+    actions.appendChild(addBtn);
+
+    const list = await patients.all();
+
+    view.innerHTML = `
+      <div class="toolbar">
+        <input class="search" type="search" id="q" placeholder="ابحث بالاسم أو التليفون…">
+        <span class="cell-sub" id="count">${list.length} مريض</span>
+      </div>
+      <div class="card"><div id="list"></div></div>`;
+
+    const draw = async (q = '') => {
+      const listEl = view.querySelector('#list');
+      const countEl = view.querySelector('#count');
+      const rows = await patients.search(q);
+      // البحث بيتأخر شوية، فممكن يخلص بعد ما المستخدم يكون خرج من الصفحة
+      if (!listEl || !listEl.isConnected) return;
+
+      countEl.textContent = `${rows.length} مريض`;
+      listEl.innerHTML = rows.length
+        ? `<div class="table-wrap"><table class="data">
+            <thead><tr><th>الاسم</th><th>التليفون</th><th>السن</th><th>فصيلة الدم</th><th></th></tr></thead>
+            <tbody>${rows
+              .sort((a, b) => a.name.localeCompare(b.name, 'ar'))
+              .map((p) => {
+                const a = age(p.birthDate);
+                return `<tr>
+                  <td><a href="#/patients/${esc(p.id)}" class="cell-main">${esc(p.name)}</a>
+                    ${p.allergies ? '<span class="badge badge--danger" style="margin-inline-start:6px">⚠️ حساسية</span>' : ''}</td>
+                  <td class="num">${esc(p.phone)}</td>
+                  <td>${a !== null ? esc(a) : '—'}</td>
+                  <td>${esc(p.bloodType || '—')}</td>
+                  <td class="actions">
+                    <button class="btn btn--sm" data-edit="${esc(p.id)}">تعديل</button>
+                    <button class="btn btn--sm btn--ghost" data-del="${esc(p.id)}" style="color:var(--danger)">حذف</button>
+                  </td></tr>`;
+              })
+              .join('')}</tbody></table></div>`
+        : empty('🧑‍🤝‍🧑', q ? 'مفيش نتائج للبحث ده' : 'مفيش مرضى لسه', q ? '' : 'ابدأ بإضافة أول مريض.');
+
+      view.querySelectorAll('[data-edit]').forEach((b) => {
+        b.onclick = async () => {
+          const p = await patients.get(b.dataset.edit);
+          if (await patientForm(p)) draw(view.querySelector('#q').value);
+        };
+      });
+
+      view.querySelectorAll('[data-del]').forEach((b) => {
+        b.onclick = async () => {
+          const p = await patients.get(b.dataset.del);
+          const ok = await confirmBox(
+            `هتمسح "${p.name}" وكل مواعيده وسجلاته وفواتيره. الخطوة دي مالهاش رجعة.`
+          );
+          if (!ok) return;
+          await patients.remove(p.id);
+          toast('اتمسح المريض');
+          draw(view.querySelector('#q').value);
+        };
+      });
+    };
+
+    let timer;
+    view.querySelector('#q').addEventListener('input', (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => draw(e.target.value), 180);
+    });
+
+    await draw();
+  },
+};
+
+
+/* ═══ js/pages/appointments.js ═══ */
+/** المواعيد — عرض باليوم، حجز موعد جديد، وتغيير الحالة */
+
+
+
+/** بيولّد المواعيد المتاحة حسب ساعات العمل في الإعدادات */
+function timeSlots(cfg) {
+  const out = [];
+  const [sh, sm] = cfg.workStart.split(':').map(Number);
+  const [eh, em] = cfg.workEnd.split(':').map(Number);
+  const step = Number(cfg.slotMinutes) || 30;
+  for (let t = sh * 60 + sm; t <= eh * 60 + em; t += step) {
+    out.push(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`);
+  }
+  return out;
+}
+
+/* ————————————————————————— فورم الموعد ————————————————————————— */
+
+async function appointmentForm(existing = null, preset = {}) {
+  const a = { ...preset, ...(existing || {}) };
+  const isEdit = !!existing;
+
+  const [pats, docs, cfg] = await Promise.all([
+    patients.all(),
+    doctors.active(),
+    settings.get(),
+  ]);
+
+  if (!docs.length) {
+    toast('ضيف طبيب واحد على الأقل الأول', 'warn');
+    location.hash = '#/doctors';
+    return null;
+  }
+
+  let saved = null;
+  await modal(
+    isEdit ? 'تعديل الموعد' : 'حجز موعد جديد',
+    `
+    ${field('المريض *', `<select name="patientId" required>
+      <option value="">— اختار المريض —</option>
+      ${options(pats.sort((x, y) => x.name.localeCompare(y.name, 'ar')), 'id',
+        (p) => `${p.name} — ${p.phone}`, a.patientId)}
+    </select>`)}
+    <button type="button" class="btn btn--sm" data-new-patient style="margin:-8px 0 14px">+ مريض جديد</button>
+
+    ${field('الطبيب *', `<select name="doctorId" required>
+      <option value="">— اختار الطبيب —</option>
+      ${options(docs, 'id', (d) => `${d.name} — ${d.specialty}`, a.doctorId)}
+    </select>`)}
+
+    <div class="field-row">
+      ${field('التاريخ *', `<input type="date" name="date" value="${esc(a.date || today())}" required>`)}
+      ${field('الوقت *', `<select name="time" required>
+        ${timeSlots(cfg).map((t) => `<option value="${t}" ${a.time === t ? 'selected' : ''}>${fmtTime(t)}</option>`).join('')}
+      </select>`)}
+    </div>
+
+    ${field('سبب الزيارة', `<input type="text" name="reason" value="${esc(a.reason || '')}" placeholder="مثلاً: كشف أول، متابعة، ألم في…">`)}
+
+    ${isEdit ? field('الحالة', `<select name="status">
+      ${Object.entries(APPOINTMENT_STATUS)
+        .map(([k, v]) => `<option value="${k}" ${a.status === k ? 'selected' : ''}>${v.label}</option>`)
+        .join('')}
+    </select>`) : ''}
+
+    ${field('ملاحظات', `<textarea name="notes">${esc(a.notes || '')}</textarea>`)}
+    `,
+    {
+      okLabel: isEdit ? 'حفظ التعديلات' : 'احجز الموعد',
+
+      // زرار "مريض جديد" بيفتح نافذة جوه النافذة وبيضيف المريض للقائمة على طول
+      onOpen(node) {
+        node.querySelector('[data-new-patient]').onclick = async () => {
+          const p = await patientForm();
+          if (!p) return;
+          const sel = node.querySelector('select[name="patientId"]');
+          sel.appendChild(h(`<option value="${esc(p.id)}" selected>${esc(p.name)} — ${esc(p.phone)}</option>`));
+          sel.value = p.id;
+        };
+      },
+
+      async onSubmit(form) {
+        saved = await appointments.save({ ...a, ...formData(form) });
+        toast(isEdit ? 'اتحفظ الموعد' : 'تم حجز الموعد');
+      },
+    }
+  );
+
+  return saved;
+}
+
+/* ————————————————————————— الصفحة ————————————————————————— */
+
+const appointmentsPage = {
+  async render(view, { actions, reload }) {
+    const addBtn = h('<button class="btn btn--primary">+ موعد جديد</button>');
+    addBtn.onclick = async () => { if (await appointmentForm()) reload(); };
+    actions.appendChild(addBtn);
+
+    const cfg = await settings.get();
+    let date = today();
+    let statusFilter = '';
+
+    view.innerHTML = `
+      <div class="toolbar">
+        <button class="btn btn--sm" id="prev">→ السابق</button>
+        <input type="date" id="date" value="${date}" style="width:auto">
+        <button class="btn btn--sm" id="next">التالي ←</button>
+        <button class="btn btn--sm" id="today">النهاردة</button>
+        <select id="status" style="width:auto">
+          <option value="">كل الحالات</option>
+          ${Object.entries(APPOINTMENT_STATUS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}
+        </select>
+        <button class="btn btn--sm" id="print">🖨️ طباعة جدول اليوم</button>
+      </div>
+      <div class="card">
+        <div class="card__head"><h2 id="day-title"></h2><span class="cell-sub" id="count"></span></div>
+        <div id="list"></div>
+      </div>`;
+
+    const el = (id) => view.querySelector('#' + id);
+
+    const draw = async () => {
+      const listEl = el('list');
+      if (!listEl) return;
+      el('date').value = date;
+      el('day-title').textContent = `${fmtDay(date)} — ${fmtDate(date)}`;
+
+      let rows = await appointments.detailed((a) => a.date === date);
+      // ممكن المستخدم يكون خرج من الصفحة والتحميل لسه شغال
+      if (!listEl.isConnected) return;
+      if (statusFilter) rows = rows.filter((a) => a.status === statusFilter);
+      el('count').textContent = `${rows.length} موعد`;
+
+      listEl.innerHTML = rows.length
+        ? `<div class="table-wrap"><table class="data">
+            <thead><tr><th>الوقت</th><th>المريض</th><th>الطبيب</th><th>سبب الزيارة</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>${rows.map((a) => {
+              const st = APPOINTMENT_STATUS[a.status] || APPOINTMENT_STATUS.scheduled;
+              return `<tr>
+                <td class="num"><strong>${esc(fmtTime(a.time))}</strong></td>
+                <td>${a.patient
+                  ? `<a href="#/patients/${esc(a.patient.id)}" class="cell-main">${esc(a.patient.name)}</a>
+                     <div class="cell-sub">${esc(a.patient.phone)}</div>`
+                  : '<span class="cell-sub">مريض محذوف</span>'}</td>
+                <td>${esc(a.doctor?.name || '—')}<div class="cell-sub">${esc(a.doctor?.specialty || '')}</div></td>
+                <td>${esc(a.reason || '—')}</td>
+                <td>
+                  <select data-status="${esc(a.id)}" style="width:auto;padding:4px 8px;font-size:12.5px">
+                    ${Object.entries(APPOINTMENT_STATUS)
+                      .map(([k, v]) => `<option value="${k}" ${a.status === k ? 'selected' : ''}>${v.label}</option>`)
+                      .join('')}
+                  </select>
+                </td>
+                <td class="actions">
+                  <button class="btn btn--sm" data-edit="${esc(a.id)}">تعديل</button>
+                  <button class="btn btn--sm btn--ghost" data-del="${esc(a.id)}" style="color:var(--danger)">حذف</button>
+                </td></tr>`;
+            }).join('')}</tbody></table></div>`
+        : empty('🗓️', 'مفيش مواعيد في اليوم ده', 'جرّب يوم تاني أو احجز موعد جديد.');
+
+      view.querySelectorAll('[data-status]').forEach((sel) => {
+        sel.onchange = async () => {
+          const a = await appointments.get(sel.dataset.status);
+          await appointments.save({ ...a, status: sel.value });
+          toast('اتغيّرت حالة الموعد');
+          draw();
+        };
+      });
+
+      view.querySelectorAll('[data-edit]').forEach((b) => {
+        b.onclick = async () => {
+          const a = await appointments.get(b.dataset.edit);
+          if (await appointmentForm(a)) draw();
+        };
+      });
+
+      view.querySelectorAll('[data-del]').forEach((b) => {
+        b.onclick = async () => {
+          if (!(await confirmBox('هتلغي الموعد ده نهائيًا؟'))) return;
+          await appointments.remove(b.dataset.del);
+          toast('اتمسح الموعد');
+          draw();
+        };
+      });
+    };
+
+    const shift = (days) => {
+      const d = new Date(date + 'T00:00:00');
+      d.setDate(d.getDate() + days);
+      date = d.toISOString().slice(0, 10);
+      draw();
+    };
+
+    el('prev').onclick = () => shift(-1);
+    el('next').onclick = () => shift(1);
+    el('today').onclick = () => { date = today(); draw(); };
+    el('date').onchange = (e) => { date = e.target.value; draw(); };
+    el('status').onchange = (e) => { statusFilter = e.target.value; draw(); };
+
+    el('print').onclick = async () => {
+      const rows = await appointments.detailed((a) => a.date === date);
+      printView(
+        `جدول مواعيد ${fmtDay(date)} ${fmtDate(date)}`,
+        `<div class="p-head">
+          <div><div class="p-clinic">${esc(cfg.clinicName)}</div>
+            <div class="p-meta">${esc(cfg.phone)} — ${esc(cfg.address)}</div></div>
+          <div class="p-meta">${esc(rows.length)} موعد</div>
+        </div>
+        ${rows.length ? `<table>
+          <thead><tr><th>الوقت</th><th>المريض</th><th>التليفون</th><th>الطبيب</th><th>سبب الزيارة</th><th>الحالة</th></tr></thead>
+          <tbody>${rows.map((a) => `<tr>
+            <td>${esc(fmtTime(a.time))}</td>
+            <td>${esc(a.patient?.name || '—')}</td>
+            <td>${esc(a.patient?.phone || '—')}</td>
+            <td>${esc(a.doctor?.name || '—')}</td>
+            <td>${esc(a.reason || '—')}</td>
+            <td>${esc((APPOINTMENT_STATUS[a.status] || {}).label || '—')}</td>
+          </tr>`).join('')}</tbody></table>` : '<p>لا توجد مواعيد في هذا اليوم.</p>'}`
+      );
+    };
+
+    await draw();
+  },
+};
+
+
+/* ═══ js/pages/records.js ═══ */
+/** السجلات الطبية — تشخيص وروشتة لكل زيارة، مع طباعة الروشتة */
+
+
+async function recordForm(existing = null, preset = {}) {
+  const r = { ...preset, ...(existing || {}) };
+  const isEdit = !!existing;
+
+  const [pats, docs] = await Promise.all([patients.all(), doctors.active()]);
+
+  if (!pats.length) {
+    toast('ضيف مريض واحد على الأقل الأول', 'warn');
+    location.hash = '#/patients';
+    return null;
+  }
+
+  let saved = null;
+  await modal(
+    isEdit ? 'تعديل السجل الطبي' : 'سجل طبي جديد',
+    `
+    <div class="field-row">
+      ${field('المريض *', `<select name="patientId" required>
+        <option value="">— اختار المريض —</option>
+        ${options(pats.sort((x, y) => x.name.localeCompare(y.name, 'ar')), 'id', (p) => `${p.name} — ${p.phone}`, r.patientId)}
+      </select>`)}
+      ${field('الطبيب', `<select name="doctorId">
+        <option value="">— غير محدد —</option>
+        ${options(docs, 'id', (d) => `${d.name} — ${d.specialty}`, r.doctorId)}
+      </select>`)}
+    </div>
+
+    ${field('تاريخ الزيارة', `<input type="date" name="date" value="${esc(r.date || today())}">`)}
+    ${field('الأعراض والشكوى', `<textarea name="symptoms" placeholder="اللي المريض بيشتكي منه…">${esc(r.symptoms || '')}</textarea>`)}
+    ${field('التشخيص *', `<textarea name="diagnosis" required>${esc(r.diagnosis || '')}</textarea>`)}
+    ${field('الروشتة', `<textarea name="prescription" rows="5" placeholder="دواء وجرعته في كل سطر…">${esc(r.prescription || '')}</textarea>`,
+      'اكتب كل دواء في سطر لوحده عشان الروشتة تطلع منظمة في الطباعة')}
+    ${field('ملاحظات وتعليمات', `<textarea name="notes">${esc(r.notes || '')}</textarea>`)}
+    `,
+    {
+      okLabel: isEdit ? 'حفظ التعديلات' : 'حفظ السجل',
+      wide: true,
+      async onSubmit(form) {
+        saved = await records.save({ ...r, ...formData(form) });
+        toast(isEdit ? 'اتحفظ السجل' : 'تم حفظ السجل الطبي');
+      },
+    }
+  );
+  return saved;
+}
+
+/** روشتة جاهزة للطباعة */
+function printPrescription(rec, patient, doctor, cfg) {
+  const a = age(patient?.birthDate);
+  printView(
+    'روشتة طبية',
+    `<div class="p-head">
+      <div><div class="p-clinic">${esc(cfg.clinicName)}</div>
+        <div class="p-meta">${esc(cfg.phone)} — ${esc(cfg.address)}</div></div>
+      <div class="p-meta">
+        ${doctor ? `<div><strong>${esc(doctor.name)}</strong></div><div>${esc(doctor.specialty)}</div>` : ''}
+        <div>${esc(fmtDate(rec.date))}</div>
+      </div>
+    </div>
+
+    <table><tbody>
+      <tr><th style="width:100px">المريض</th><td>${esc(patient?.name || '—')}</td>
+          <th style="width:70px">السن</th><td>${a !== null ? esc(a) + ' سنة' : '—'}</td></tr>
+      ${patient?.allergies ? `<tr><th>تحذير</th><td colspan="3"><strong>${esc(patient.allergies)}</strong></td></tr>` : ''}
+    </tbody></table>
+
+    ${rec.diagnosis ? `<div class="p-section"><h3>التشخيص</h3><p>${esc(rec.diagnosis)}</p></div>` : ''}
+
+    <div class="p-section">
+      <h3>℞ العلاج</h3>
+      <div style="white-space:pre-wrap;font-size:15px;line-height:2.1;min-height:150px">${esc(rec.prescription || '—')}</div>
+    </div>
+
+    ${rec.notes ? `<div class="p-section"><h3>تعليمات</h3><p style="white-space:pre-wrap">${esc(rec.notes)}</p></div>` : ''}
+
+    <div style="margin-top:40px;text-align:end">
+      <div style="border-top:1px solid #333;display:inline-block;padding-top:6px;min-width:180px;text-align:center">
+        توقيع الطبيب
+      </div>
+    </div>`
+  );
+}
+
+const recordsPage = {
+  async render(view, { actions, reload }) {
+    const addBtn = h('<button class="btn btn--primary">+ سجل طبي</button>');
+    addBtn.onclick = async () => { if (await recordForm()) reload(); };
+    actions.appendChild(addBtn);
+
+    const [list, pats, docs, cfg] = await Promise.all([
+      records.all(), patients.all(), doctors.all(), settings.get(),
+    ]);
+    const pMap = Object.fromEntries(pats.map((p) => [p.id, p]));
+    const dMap = Object.fromEntries(docs.map((d) => [d.id, d]));
+
+    view.innerHTML = `
+      <div class="toolbar">
+        <input class="search" type="search" id="q" placeholder="ابحث باسم المريض أو التشخيص…">
+        <span class="cell-sub" id="count"></span>
+      </div>
+      <div class="card"><div id="list"></div></div>`;
+
+    const draw = (q = '') => {
+      const term = q.trim().toLowerCase();
+      const rows = list
+        .filter((r) => {
+          if (!term) return true;
+          const p = pMap[r.patientId];
+          return (
+            (p?.name || '').toLowerCase().includes(term) ||
+            (r.diagnosis || '').toLowerCase().includes(term)
+          );
+        })
+        .sort((x, y) => (y.date || '').localeCompare(x.date || ''));
+
+      view.querySelector('#count').textContent = `${rows.length} سجل`;
+      view.querySelector('#list').innerHTML = rows.length
+        ? `<div class="table-wrap"><table class="data">
+            <thead><tr><th>التاريخ</th><th>المريض</th><th>الطبيب</th><th>التشخيص</th><th></th></tr></thead>
+            <tbody>${rows.map((r) => {
+              const p = pMap[r.patientId];
+              return `<tr>
+                <td>${esc(fmtDate(r.date))}</td>
+                <td>${p ? `<a href="#/patients/${esc(p.id)}" class="cell-main">${esc(p.name)}</a>` : '<span class="cell-sub">مريض محذوف</span>'}</td>
+                <td>${esc(dMap[r.doctorId]?.name || '—')}</td>
+                <td>${esc(r.diagnosis)}
+                  ${r.prescription ? '<div class="cell-sub">📝 فيه روشتة</div>' : ''}</td>
+                <td class="actions">
+                  <button class="btn btn--sm" data-print="${esc(r.id)}">🖨️ روشتة</button>
+                  <button class="btn btn--sm" data-edit="${esc(r.id)}">تعديل</button>
+                  <button class="btn btn--sm btn--ghost" data-del="${esc(r.id)}" style="color:var(--danger)">حذف</button>
+                </td></tr>`;
+            }).join('')}</tbody></table></div>`
+        : empty('📋', q ? 'مفيش نتائج' : 'مفيش سجلات طبية لسه',
+            q ? '' : 'السجل الطبي بيوثّق كل زيارة: الأعراض والتشخيص والروشتة.');
+
+      view.querySelectorAll('[data-print]').forEach((b) => {
+        b.onclick = () => {
+          const r = list.find((x) => x.id === b.dataset.print);
+          printPrescription(r, pMap[r.patientId], dMap[r.doctorId], cfg);
+        };
+      });
+
+      view.querySelectorAll('[data-edit]').forEach((b) => {
+        b.onclick = async () => {
+          const r = await records.get(b.dataset.edit);
+          if (await recordForm(r)) reload();
+        };
+      });
+
+      view.querySelectorAll('[data-del]').forEach((b) => {
+        b.onclick = async () => {
+          if (!(await confirmBox('هتمسح السجل الطبي ده نهائيًا؟'))) return;
+          await records.remove(b.dataset.del);
+          toast('اتمسح السجل');
+          reload();
+        };
+      });
+    };
+
+    let timer;
+    view.querySelector('#q').addEventListener('input', (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => draw(e.target.value), 180);
+    });
+
+    draw();
+  },
+};
+
+
+/* ═══ js/pages/doctors.js ═══ */
+/** الأطباء — قائمة وإدارة */
+
+
+const SPECIALTIES = [
+  'باطنة', 'أطفال', 'نساء وتوليد', 'عظام', 'جلدية', 'أسنان',
+  'مخ وأعصاب', 'قلب', 'أنف وأذن', 'عيون', 'مسالك بولية', 'علاج طبيعي', 'تخصص آخر',
+];
+
+async function doctorForm(existing = null) {
+  const d = existing || {};
+  const isEdit = !!existing;
+
+  let saved = null;
+  await modal(
+    isEdit ? 'تعديل بيانات الطبيب' : 'طبيب جديد',
+    `
+    ${field('اسم الطبيب *', `<input type="text" name="name" value="${esc(d.name || '')}" placeholder="د. …" required>`)}
+    <div class="field-row">
+      ${field('التخصص *', `<select name="specialty" required>
+        <option value="">— اختار —</option>
+        ${SPECIALTIES.map((s) => `<option value="${esc(s)}" ${d.specialty === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}
+      </select>`)}
+      ${field('سعر الكشف', `<input type="number" name="fee" min="0" step="5" value="${esc(d.fee ?? 0)}">`)}
+    </div>
+    <div class="field-row">
+      ${field('التليفون', `<input type="tel" name="phone" value="${esc(d.phone || '')}">`)}
+      ${field('البريد الإلكتروني', `<input type="email" name="email" value="${esc(d.email || '')}">`)}
+    </div>
+    ${field('أيام وساعات العمل', `<input type="text" name="schedule" value="${esc(d.schedule || '')}" placeholder="مثلاً: السبت والاثنين ٤م — ٩م">`)}
+    <label class="check">
+      <input type="checkbox" name="active" ${d.active !== false ? 'checked' : ''}>
+      <span>نشط — يظهر في قائمة حجز المواعيد</span>
+    </label>
+    `,
+    {
+      okLabel: isEdit ? 'حفظ التعديلات' : 'إضافة الطبيب',
+      async onSubmit(form) {
+        saved = await doctors.save({ ...d, ...formData(form) });
+        toast(isEdit ? 'اتحفظت التعديلات' : 'تمت إضافة الطبيب');
+      },
+    }
+  );
+  return saved;
+}
+
+const doctorsPage = {
+  async render(view, { actions, reload }) {
+    const addBtn = h('<button class="btn btn--primary">+ طبيب جديد</button>');
+    addBtn.onclick = async () => { if (await doctorForm()) reload(); };
+    actions.appendChild(addBtn);
+
+    const [list, appts, cfg] = await Promise.all([
+      doctors.all(),
+      appointments.all(),
+      settings.get(),
+    ]);
+
+    const counts = {};
+    for (const a of appts) counts[a.doctorId] = (counts[a.doctorId] || 0) + 1;
+
+    view.innerHTML = `<div class="card">${
+      list.length
+        ? `<div class="table-wrap"><table class="data">
+            <thead><tr><th>الطبيب</th><th>التخصص</th><th>سعر الكشف</th><th>المواعيد</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>${list
+              .sort((a, b) => a.name.localeCompare(b.name, 'ar'))
+              .map((d) => `<tr>
+                <td><div class="cell-main">${esc(d.name)}</div>
+                  <div class="cell-sub">${esc(d.phone || '')} ${d.schedule ? '· ' + esc(d.schedule) : ''}</div></td>
+                <td>${esc(d.specialty)}</td>
+                <td class="num">${esc(fmtMoney(d.fee, cfg.currency))}</td>
+                <td class="num">${counts[d.id] || 0}</td>
+                <td><span class="badge badge--${d.active !== false ? 'ok' : 'muted'}">${d.active !== false ? 'نشط' : 'موقوف'}</span></td>
+                <td class="actions">
+                  <button class="btn btn--sm" data-edit="${esc(d.id)}">تعديل</button>
+                  <button class="btn btn--sm btn--ghost" data-del="${esc(d.id)}" style="color:var(--danger)">حذف</button>
+                </td></tr>`).join('')}</tbody></table></div>`
+        : empty('👨‍⚕️', 'مفيش أطباء لسه', 'لازم تضيف طبيب واحد على الأقل قبل ما تقدر تحجز مواعيد.')
+    }</div>`;
+
+    view.querySelectorAll('[data-edit]').forEach((b) => {
+      b.onclick = async () => {
+        const d = await doctors.get(b.dataset.edit);
+        if (await doctorForm(d)) reload();
+      };
+    });
+
+    view.querySelectorAll('[data-del]').forEach((b) => {
+      b.onclick = async () => {
+        const d = await doctors.get(b.dataset.del);
+        if (!(await confirmBox(`هتمسح "${d.name}" نهائيًا؟`))) return;
+        try {
+          await doctors.remove(d.id);
+          toast('اتمسح الطبيب');
+          reload();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      };
+    });
+  },
+};
+
+
+/* ═══ js/pages/invoices.js ═══ */
+/** الفواتير — إنشاء فاتورة ببنود، تحصيل، وطباعة */
+
+
+const STATUS = {
+  paid: { label: 'مدفوعة', tone: 'ok' },
+  partial: { label: 'مدفوعة جزئيًا', tone: 'warn' },
+  unpaid: { label: 'غير مدفوعة', tone: 'danger' },
+};
+
+const METHODS = { cash: 'كاش', card: 'فيزا', wallet: 'محفظة إلكترونية', transfer: 'تحويل بنكي' };
+
+/* ————————————————————————— فورم الفاتورة ————————————————————————— */
+
+function itemRow(item = {}, srv = []) {
+  return `
+    <div class="item-row" data-item>
+      <input type="text" data-name list="services-list" value="${esc(item.name || '')}" placeholder="اسم البند">
+      <input type="number" data-qty min="1" step="1" value="${esc(item.qty || 1)}" placeholder="عدد">
+      <input type="number" data-price min="0" step="5" value="${esc(item.price ?? '')}" placeholder="السعر">
+      <button type="button" class="icon-btn" data-remove title="حذف البند">✕</button>
+    </div>`;
+}
+
+async function invoiceForm(existing = null) {
+  const inv = existing || {};
+  const isEdit = !!existing;
+
+  const [pats, srv, cfg] = await Promise.all([patients.all(), services.all(), settings.get()]);
+
+  if (!pats.length) {
+    toast('ضيف مريض واحد على الأقل الأول', 'warn');
+    location.hash = '#/patients';
+    return null;
+  }
+
+  const items = inv.items?.length ? inv.items : [{}];
+
+  let saved = null;
+  await modal(
+    isEdit ? `تعديل الفاتورة ${inv.number || ''}` : 'فاتورة جديدة',
+    `
+    <datalist id="services-list">
+      ${srv.map((s) => `<option value="${esc(s.name)}" data-price="${esc(s.price)}">`).join('')}
+    </datalist>
+
+    <div class="field-row">
+      ${field('المريض *', `<select name="patientId" required>
+        <option value="">— اختار المريض —</option>
+        ${options(pats.sort((x, y) => x.name.localeCompare(y.name, 'ar')), 'id', (p) => `${p.name} — ${p.phone}`, inv.patientId)}
+      </select>`)}
+      ${field('التاريخ', `<input type="date" name="date" value="${esc(inv.date || today())}">`)}
+    </div>
+
+    <div class="field__label">بنود الفاتورة</div>
+    <div class="items-head"><span>البند</span><span>العدد</span><span>السعر</span><span></span></div>
+    <div id="items">${items.map((it) => itemRow(it, srv)).join('')}</div>
+    <button type="button" class="btn btn--sm" id="add-item" style="margin-bottom:14px">+ بند جديد</button>
+
+    <div class="field-row--3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 14px">
+      ${field('خصم', `<input type="number" name="discount" min="0" step="5" value="${esc(inv.discount || 0)}">`)}
+      ${field('المدفوع', `<input type="number" name="paid" min="0" step="5" value="${esc(inv.paid || 0)}">`)}
+      ${field('طريقة الدفع', `<select name="method">
+        ${Object.entries(METHODS).map(([k, v]) => `<option value="${k}" ${inv.method === k ? 'selected' : ''}>${v}</option>`).join('')}
+      </select>`)}
+    </div>
+
+    <div class="totals" id="totals"></div>
+    `,
+    {
+      okLabel: isEdit ? 'حفظ التعديلات' : 'إنشاء الفاتورة',
+      wide: true,
+      onOpen: (node) => wireInvoiceModal(node, cfg),
+      async onSubmit(form) {
+        saved = await invoices.save({ ...inv, ...formData(form), items: readItems(form) });
+        toast(isEdit ? 'اتحفظت الفاتورة' : 'اتعملت الفاتورة');
+      },
+    }
+  );
+  return saved;
+}
+
+function readItems(root) {
+  return $$('[data-item]', root).map((row) => ({
+    name: row.querySelector('[data-name]').value.trim(),
+    qty: Number(row.querySelector('[data-qty]').value) || 1,
+    price: Number(row.querySelector('[data-price]').value) || 0,
+  }));
+}
+
+/** بيربط منطق البنود والإجماليات جوه نافذة الفاتورة */
+function wireInvoiceModal(modalEl, cfg) {
+  const itemsBox = modalEl.querySelector('#items');
+  const totalsBox = modalEl.querySelector('#totals');
+  const srvPrices = Object.fromEntries(
+    $$('#services-list option', modalEl).map((o) => [o.value, Number(o.dataset.price) || 0])
+  );
+
+  const recalc = () => {
+    const items = readItems(modalEl);
+    const total = items.reduce((s, it) => s + it.price * it.qty, 0);
+    const discount = Number(modalEl.querySelector('[name="discount"]').value) || 0;
+    const net = Math.max(0, total - discount);
+    const paid = Number(modalEl.querySelector('[name="paid"]').value) || 0;
+
+    totalsBox.innerHTML = `
+      <div class="totals__row"><span>الإجمالي</span><span>${esc(fmtMoney(total, cfg.currency))}</span></div>
+      <div class="totals__row"><span>الخصم</span><span>- ${esc(fmtMoney(discount, cfg.currency))}</span></div>
+      <div class="totals__row"><strong>المطلوب</strong><strong>${esc(fmtMoney(net, cfg.currency))}</strong></div>
+      <div class="totals__row"><span>المدفوع</span><span>${esc(fmtMoney(paid, cfg.currency))}</span></div>
+      <div class="totals__row" style="color:${net - paid > 0 ? 'var(--danger)' : 'var(--ok)'}">
+        <strong>الباقي</strong><strong>${esc(fmtMoney(Math.max(0, net - paid), cfg.currency))}</strong></div>`;
+  };
+
+  // لما تكتب اسم خدمة معروفة، السعر بيتحط لوحده
+  modalEl.addEventListener('input', (e) => {
+    if (e.target.matches('[data-name]')) {
+      const price = srvPrices[e.target.value];
+      const priceInput = e.target.closest('[data-item]').querySelector('[data-price]');
+      if (price != null && !priceInput.value) priceInput.value = price;
+    }
+    recalc();
+  });
+
+  modalEl.querySelector('#add-item').onclick = () => {
+    itemsBox.appendChild(h(itemRow()));
+    recalc();
+  };
+
+  modalEl.addEventListener('click', (e) => {
+    if (e.target.closest('[data-remove]')) {
+      const rows = $$('[data-item]', modalEl);
+      if (rows.length === 1) return toast('لازم بند واحد على الأقل', 'warn');
+      e.target.closest('[data-item]').remove();
+      recalc();
+    }
+  });
+
+  recalc();
+}
+
+/* ————————————————————————— طباعة الفاتورة ————————————————————————— */
+
+function printInvoice(inv, patient, cfg) {
+  printView(
+    `فاتورة ${inv.number}`,
+    `<div class="p-head">
+      <div><div class="p-clinic">${esc(cfg.clinicName)}</div>
+        <div class="p-meta">${esc(cfg.phone)} — ${esc(cfg.address)}</div></div>
+      <div class="p-meta">
+        <div><strong>فاتورة رقم: ${esc(inv.number)}</strong></div>
+        <div>التاريخ: ${esc(fmtDate(inv.date))}</div>
+        <div>المريض: ${esc(patient?.name || '—')}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>البند</th><th style="width:70px">العدد</th><th style="width:100px">السعر</th><th style="width:110px">الإجمالي</th></tr></thead>
+      <tbody>${inv.items.map((it) => `<tr>
+        <td>${esc(it.name)}</td>
+        <td>${esc(it.qty)}</td>
+        <td>${esc(fmtMoney(it.price, cfg.currency))}</td>
+        <td>${esc(fmtMoney(it.price * it.qty, cfg.currency))}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+
+    <div class="p-totals">
+      <div><span>الإجمالي</span><span>${esc(fmtMoney(inv.total, cfg.currency))}</span></div>
+      <div><span>الخصم</span><span>- ${esc(fmtMoney(inv.discount, cfg.currency))}</span></div>
+      <div class="p-grand"><span>المطلوب</span><span>${esc(fmtMoney(inv.net, cfg.currency))}</span></div>
+      <div><span>المدفوع (${esc(METHODS[inv.method] || '—')})</span><span>${esc(fmtMoney(inv.paid, cfg.currency))}</span></div>
+      <div><span>الباقي</span><span>${esc(fmtMoney(inv.due, cfg.currency))}</span></div>
+    </div>`
+  );
+}
+
+/* ————————————————————————— الصفحة ————————————————————————— */
+
+const invoicesPage = {
+  async render(view, { actions, reload }) {
+    const cfg = await settings.get();
+
+    const addBtn = h('<button class="btn btn--primary">+ فاتورة جديدة</button>');
+    addBtn.onclick = async () => { if (await invoiceForm()) reload(); };
+    actions.appendChild(addBtn);
+
+    const [list, pats] = await Promise.all([invoices.all(), patients.all()]);
+    const pMap = Object.fromEntries(pats.map((p) => [p.id, p]));
+
+    const totalPaid = list.reduce((s, i) => s + (i.paid || 0), 0);
+    const totalDue = list.reduce((s, i) => s + (i.due || 0), 0);
+
+    view.innerHTML = `
+      <div class="grid grid--stats" style="margin-bottom:16px">
+        <div class="stat"><div class="stat__icon" style="background:var(--ok-soft)">💰</div>
+          <div><div class="stat__num" style="font-size:21px">${esc(fmtMoney(totalPaid, cfg.currency))}</div>
+          <div class="stat__label">إجمالي المحصّل</div></div></div>
+        <div class="stat"><div class="stat__icon" style="background:var(--warn-soft)">⏳</div>
+          <div><div class="stat__num" style="font-size:21px">${esc(fmtMoney(totalDue, cfg.currency))}</div>
+          <div class="stat__label">مستحقات متبقية</div></div></div>
+        <div class="stat"><div class="stat__icon">🧾</div>
+          <div><div class="stat__num">${list.length}</div><div class="stat__label">فاتورة</div></div></div>
+      </div>
+
+      <div class="card">${
+        list.length
+          ? `<div class="table-wrap"><table class="data">
+              <thead><tr><th>رقم الفاتورة</th><th>المريض</th><th>التاريخ</th><th>المطلوب</th><th>المدفوع</th><th>الباقي</th><th>الحالة</th><th></th></tr></thead>
+              <tbody>${list
+                .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+                .map((i) => {
+                  const st = STATUS[i.status] || STATUS.unpaid;
+                  const p = pMap[i.patientId];
+                  return `<tr>
+                    <td class="cell-main">${esc(i.number)}</td>
+                    <td>${p ? `<a href="#/patients/${esc(p.id)}">${esc(p.name)}</a>` : '<span class="cell-sub">مريض محذوف</span>'}</td>
+                    <td>${esc(fmtDate(i.date))}</td>
+                    <td class="num">${esc(fmtMoney(i.net, cfg.currency))}</td>
+                    <td class="num">${esc(fmtMoney(i.paid, cfg.currency))}</td>
+                    <td class="num" style="color:${i.due > 0 ? 'var(--danger)' : 'inherit'}">${esc(fmtMoney(i.due, cfg.currency))}</td>
+                    <td><span class="badge badge--${st.tone}">${st.label}</span></td>
+                    <td class="actions">
+                      <button class="btn btn--sm" data-print="${esc(i.id)}">🖨️</button>
+                      <button class="btn btn--sm" data-edit="${esc(i.id)}">تعديل</button>
+                      <button class="btn btn--sm btn--ghost" data-del="${esc(i.id)}" style="color:var(--danger)">حذف</button>
+                    </td></tr>`;
+                }).join('')}</tbody></table></div>`
+          : empty('🧾', 'مفيش فواتير لسه', 'اعمل أول فاتورة من الزرار اللي فوق.')
+      }</div>`;
+
+    view.querySelectorAll('[data-print]').forEach((b) => {
+      b.onclick = async () => {
+        const i = await invoices.get(b.dataset.print);
+        printInvoice(i, pMap[i.patientId], cfg);
+      };
+    });
+
+    view.querySelectorAll('[data-edit]').forEach((b) => {
+      b.onclick = async () => {
+        const i = await invoices.get(b.dataset.edit);
+        if (await invoiceForm(i)) reload();
+      };
+    });
+
+    view.querySelectorAll('[data-del]').forEach((b) => {
+      b.onclick = async () => {
+        if (!(await confirmBox('هتمسح الفاتورة دي نهائيًا؟'))) return;
+        await invoices.remove(b.dataset.del);
+        toast('اتمسحت الفاتورة');
+        reload();
+      };
+    });
+  },
+};
+
+
+/* ═══ js/pages/reports.js ═══ */
+/** التقارير — ملخص فترة زمنية، قابل للطباعة أو الحفظ PDF */
+
+
+function monthStart() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
+/** بيجمّع أرقام الفترة كلها في مكان واحد */
+async function build(from, to) {
+  const inRange = (d) => d && d >= from && d <= to;
+
+  const [appts, invs, pats, docs, recs, cfg] = await Promise.all([
+    appointments.all(), invoices.all(), patients.all(), doctors.all(), records.all(), settings.get(),
+  ]);
+
+  const a = appts.filter((x) => inRange(x.date));
+  const i = invs.filter((x) => inRange(x.date));
+  const r = recs.filter((x) => inRange(x.date));
+
+  const byStatus = {};
+  for (const x of a) byStatus[x.status] = (byStatus[x.status] || 0) + 1;
+
+  const byDoctor = docs.map((d) => {
+    const mine = a.filter((x) => x.doctorId === d.id);
+    return {
+      name: d.name,
+      specialty: d.specialty,
+      total: mine.length,
+      done: mine.filter((x) => x.status === 'done').length,
+    };
+  }).filter((d) => d.total > 0).sort((x, y) => y.total - x.total);
+
+  const diagnoses = {};
+  for (const x of r) {
+    const key = (x.diagnosis || '').trim();
+    if (key) diagnoses[key] = (diagnoses[key] || 0) + 1;
+  }
+  const topDiagnoses = Object.entries(diagnoses).sort((x, y) => y[1] - x[1]).slice(0, 8);
+
+  const newPatients = pats.filter((p) => inRange((p.createdAt || '').slice(0, 10))).length;
+
+  return {
+    cfg,
+    appointments: a.length,
+    byStatus,
+    byDoctor,
+    topDiagnoses,
+    newPatients,
+    records: r.length,
+    invoices: i.length,
+    billed: i.reduce((s, x) => s + (x.net || 0), 0),
+    collected: i.reduce((s, x) => s + (x.paid || 0), 0),
+    due: i.reduce((s, x) => s + (x.due || 0), 0),
+  };
+}
+
+function tableRows(rows, cols) {
+  if (!rows.length) return '<tr><td colspan="' + cols + '" style="text-align:center;color:var(--text-2)">لا توجد بيانات في الفترة دي</td></tr>';
+  return rows;
+}
+
+const reportsPage = {
+  async render(view) {
+    let from = monthStart();
+    let to = today();
+
+    view.innerHTML = `
+      <div class="toolbar">
+        <label class="cell-sub">من</label>
+        <input type="date" id="from" value="${from}" style="width:auto">
+        <label class="cell-sub">إلى</label>
+        <input type="date" id="to" value="${to}" style="width:auto">
+        <button class="btn btn--sm btn--primary" id="apply">عرض</button>
+        <button class="btn btn--sm" id="print">🖨️ طباعة / حفظ PDF</button>
+      </div>
+      <div id="out"></div>`;
+
+    const draw = async () => {
+      const out = view.querySelector('#out');
+      const s = await build(from, to);
+      // لو المستخدم خرج من الصفحة والحساب لسه شغال، مانكتبش في عنصر مبقاش موجود
+      if (!out || !out.isConnected) return s;
+      const c = s.cfg.currency;
+
+      out.innerHTML = `
+        <div class="grid grid--stats" style="margin-bottom:16px">
+          <div class="stat"><div class="stat__icon" style="background:var(--info-soft)">📅</div>
+            <div><div class="stat__num">${s.appointments}</div><div class="stat__label">مواعيد</div></div></div>
+          <div class="stat"><div class="stat__icon">🧑‍🤝‍🧑</div>
+            <div><div class="stat__num">${s.newPatients}</div><div class="stat__label">مرضى جدد</div></div></div>
+          <div class="stat"><div class="stat__icon" style="background:var(--ok-soft)">💰</div>
+            <div><div class="stat__num" style="font-size:20px">${esc(fmtMoney(s.collected, c))}</div>
+            <div class="stat__label">محصّل</div></div></div>
+          <div class="stat"><div class="stat__icon" style="background:var(--warn-soft)">⏳</div>
+            <div><div class="stat__num" style="font-size:20px">${esc(fmtMoney(s.due, c))}</div>
+            <div class="stat__label">مستحقات</div></div></div>
+        </div>
+
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card__head"><h2>المواعيد حسب الطبيب</h2></div>
+            <div class="table-wrap"><table class="data" style="min-width:0">
+              <thead><tr><th>الطبيب</th><th>إجمالي</th><th>تم الكشف</th></tr></thead>
+              <tbody>${tableRows(s.byDoctor.map((d) => `<tr>
+                <td><div class="cell-main">${esc(d.name)}</div><div class="cell-sub">${esc(d.specialty)}</div></td>
+                <td class="num">${d.total}</td><td class="num">${d.done}</td></tr>`), 3)}</tbody>
+            </table></div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><h2>حالات المواعيد</h2></div>
+            <div class="table-wrap"><table class="data" style="min-width:0">
+              <tbody>${tableRows(Object.entries(APPOINTMENT_STATUS).map(([k, v]) => `<tr>
+                <td><span class="badge badge--${v.tone}">${v.label}</span></td>
+                <td class="num">${s.byStatus[k] || 0}</td></tr>`), 2)}</tbody>
+            </table></div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><h2>أكتر التشخيصات تكرارًا</h2></div>
+            <div class="table-wrap"><table class="data" style="min-width:0">
+              <tbody>${tableRows(s.topDiagnoses.map(([d, n]) => `<tr>
+                <td>${esc(d)}</td><td class="num">${n}</td></tr>`), 2)}</tbody>
+            </table></div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><h2>الملخص المالي</h2></div>
+            <div class="table-wrap"><table class="data" style="min-width:0"><tbody>
+              <tr><th>عدد الفواتير</th><td class="num">${s.invoices}</td></tr>
+              <tr><th>إجمالي المطلوب</th><td class="num">${esc(fmtMoney(s.billed, c))}</td></tr>
+              <tr><th>المحصّل</th><td class="num" style="color:var(--ok)">${esc(fmtMoney(s.collected, c))}</td></tr>
+              <tr><th>المتبقي</th><td class="num" style="color:var(--danger)">${esc(fmtMoney(s.due, c))}</td></tr>
+              <tr><th>سجلات طبية</th><td class="num">${s.records}</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>`;
+      return s;
+    };
+
+    view.querySelector('#apply').onclick = () => {
+      from = view.querySelector('#from').value;
+      to = view.querySelector('#to').value;
+      if (from > to) return;
+      draw();
+    };
+
+    view.querySelector('#print').onclick = async () => {
+      const s = await build(from, to);
+      const c = s.cfg.currency;
+      printView(
+        `تقرير الفترة من ${fmtDate(from)} إلى ${fmtDate(to)}`,
+        `<div class="p-head">
+          <div><div class="p-clinic">${esc(s.cfg.clinicName)}</div>
+            <div class="p-meta">${esc(s.cfg.phone)} — ${esc(s.cfg.address)}</div></div>
+          <div class="p-meta">من ${esc(fmtDate(from))} إلى ${esc(fmtDate(to))}</div>
+        </div>
+
+        <div class="p-section"><h3>ملخص عام</h3>
+          <table><tbody>
+            <tr><th>عدد المواعيد</th><td>${s.appointments}</td><th>مرضى جدد</th><td>${s.newPatients}</td></tr>
+            <tr><th>سجلات طبية</th><td>${s.records}</td><th>عدد الفواتير</th><td>${s.invoices}</td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="p-section"><h3>المواعيد حسب الطبيب</h3>
+          <table><thead><tr><th>الطبيب</th><th>التخصص</th><th>إجمالي</th><th>تم الكشف</th></tr></thead>
+          <tbody>${s.byDoctor.length
+            ? s.byDoctor.map((d) => `<tr><td>${esc(d.name)}</td><td>${esc(d.specialty)}</td><td>${d.total}</td><td>${d.done}</td></tr>`).join('')
+            : '<tr><td colspan="4">لا توجد بيانات</td></tr>'}</tbody></table>
+        </div>
+
+        ${s.topDiagnoses.length ? `<div class="p-section"><h3>أكثر التشخيصات تكرارًا</h3>
+          <table><thead><tr><th>التشخيص</th><th style="width:80px">العدد</th></tr></thead>
+          <tbody>${s.topDiagnoses.map(([d, n]) => `<tr><td>${esc(d)}</td><td>${n}</td></tr>`).join('')}</tbody></table>
+        </div>` : ''}
+
+        <div class="p-section"><h3>الملخص المالي</h3>
+          <div class="p-totals">
+            <div><span>إجمالي المطلوب</span><span>${esc(fmtMoney(s.billed, c))}</span></div>
+            <div><span>المحصّل</span><span>${esc(fmtMoney(s.collected, c))}</span></div>
+            <div class="p-grand"><span>المتبقي</span><span>${esc(fmtMoney(s.due, c))}</span></div>
+          </div>
+        </div>`
+      );
+    };
+
+    await draw();
+  },
+};
+
+
+/* ═══ js/pages/settings.js ═══ */
+/** الإعدادات — بيانات العيادة، الخدمات، النسخ الاحتياطية */
+
+
+
+
+/* ————————————————————————— النسخ الاحتياطية ————————————————————————— */
+
+async function downloadBackup() {
+  const backup = await db.exportAll();
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `clinicflow-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('اتنزّلت النسخة الاحتياطية');
+}
+
+function restoreBackup(onDone) {
+  const input = h('<input type="file" accept="application/json,.json" hidden>');
+  document.body.appendChild(input);
+
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    input.remove();
+    if (!file) return;
+
+    const ok = await confirmBox(
+      'الاسترجاع هيمسح كل البيانات الحالية ويحط مكانها اللي في الملف. متأكد؟',
+      'استرجع'
+    );
+    if (!ok) return;
+
+    try {
+      const backup = JSON.parse(await file.text());
+      await db.importAll(backup, true);
+      toast('تم الاسترجاع بنجاح');
+      onDone();
+    } catch (err) {
+      toast(err.message || 'الملف مش صالح', 'error');
+    }
+  };
+
+  input.click();
+}
+
+/* ————————————————————————— الخدمات ————————————————————————— */
+
+async function serviceForm(existing = null) {
+  const s = existing || {};
+  let saved = null;
+  await modal(
+    existing ? 'تعديل الخدمة' : 'خدمة جديدة',
+    `${field('اسم الخدمة *', `<input type="text" name="name" value="${esc(s.name || '')}" required>`)}
+     ${field('السعر', `<input type="number" name="price" min="0" step="5" value="${esc(s.price ?? 0)}">`)}`,
+    {
+      async onSubmit(form) {
+        saved = await services.save({ ...s, ...formData(form) });
+        toast('اتحفظت الخدمة');
+      },
+    }
+  );
+  return saved;
+}
+
+/* ————————————————————————— الصفحة ————————————————————————— */
+
+const settingsPage = {
+  async render(view, { reload }) {
+    const [cfg, srv] = await Promise.all([settings.get(), services.all()]);
+
+    view.innerHTML = `
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__head"><h2>بيانات العيادة</h2></div>
+          <div class="card__body">
+            <form id="clinic-form">
+              ${field('اسم العيادة', `<input type="text" name="clinicName" value="${esc(cfg.clinicName)}">`)}
+              <div class="field-row">
+                ${field('التليفون', `<input type="tel" name="phone" value="${esc(cfg.phone)}">`)}
+                ${field('العملة', `<input type="text" name="currency" value="${esc(cfg.currency)}">`)}
+              </div>
+              ${field('العنوان', `<input type="text" name="address" value="${esc(cfg.address)}">`)}
+              <div class="field-row--3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 14px">
+                ${field('بداية العمل', `<input type="time" name="workStart" value="${esc(cfg.workStart)}">`)}
+                ${field('نهاية العمل', `<input type="time" name="workEnd" value="${esc(cfg.workEnd)}">`)}
+                ${field('مدة الموعد', `<select name="slotMinutes">
+                  ${[15, 20, 30, 45, 60].map((m) => `<option value="${m}" ${Number(cfg.slotMinutes) === m ? 'selected' : ''}>${m} دقيقة</option>`).join('')}
+                </select>`)}
+              </div>
+              <button type="submit" class="btn btn--primary">حفظ البيانات</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h2>الخدمات والأسعار</h2>
+            <button class="btn btn--sm btn--primary" id="add-service">+ خدمة</button>
+          </div>
+          <div class="table-wrap"><table class="data" style="min-width:0">
+            <tbody id="services">${
+              srv.length
+                ? srv.map((s) => `<tr>
+                    <td class="cell-main">${esc(s.name)}</td>
+                    <td class="num">${esc(fmtMoney(s.price, cfg.currency))}</td>
+                    <td class="actions">
+                      <button class="btn btn--sm" data-edit-srv="${esc(s.id)}">تعديل</button>
+                      <button class="btn btn--sm btn--ghost" data-del-srv="${esc(s.id)}" style="color:var(--danger)">حذف</button>
+                    </td></tr>`).join('')
+                : '<tr><td class="cell-sub" style="padding:20px;text-align:center">مفيش خدمات — ضيف خدماتك وأسعارها عشان تظهر لوحدها في الفواتير.</td></tr>'
+            }</tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><h2>النسخ الاحتياطية</h2></div>
+        <div class="card__body">
+          <p class="cell-sub" style="margin-bottom:14px">
+            بيانات العيادة محفوظة على المتصفح ده وعلى الجهاز ده بس. لو مسحت بيانات المتصفح أو غيّرت الجهاز، البيانات هتضيع —
+            <strong>فنزّل نسخة احتياطية بشكل دوري</strong>، ويفضل مرة كل أسبوع.
+          </p>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <button class="btn btn--primary" id="backup">⬇️ نزّل نسخة احتياطية</button>
+            <button class="btn" id="restore">⬆️ استرجع من ملف</button>
+            <button class="btn btn--ghost" id="wipe" style="color:var(--danger)">🗑️ امسح كل البيانات</button>
+          </div>
+        </div>
+      </div>`;
+
+    /* حفظ بيانات العيادة */
+    view.querySelector('#clinic-form').onsubmit = async (e) => {
+      e.preventDefault();
+      await settings.save(formData(e.target));
+      const s = await settings.get();
+      $('#brand-clinic').textContent = s.clinicName;
+      document.title = `${s.clinicName} — ClinicFlow`;
+      toast('اتحفظت بيانات العيادة');
+    };
+
+    /* الخدمات */
+    view.querySelector('#add-service').onclick = async () => {
+      if (await serviceForm()) reload();
+    };
+    view.querySelectorAll('[data-edit-srv]').forEach((b) => {
+      b.onclick = async () => {
+        const s = srv.find((x) => x.id === b.dataset.editSrv);
+        if (await serviceForm(s)) reload();
+      };
+    });
+    view.querySelectorAll('[data-del-srv]').forEach((b) => {
+      b.onclick = async () => {
+        if (!(await confirmBox('هتمسح الخدمة دي؟'))) return;
+        await services.remove(b.dataset.delSrv);
+        toast('اتمسحت الخدمة');
+        reload();
+      };
+    });
+
+    /* النسخ الاحتياطية */
+    view.querySelector('#backup').onclick = downloadBackup;
+    view.querySelector('#restore').onclick = () => restoreBackup(reload);
+    view.querySelector('#wipe').onclick = async () => {
+      const ok = await confirmBox(
+        'هتمسح كل المرضى والمواعيد والسجلات والفواتير نهائيًا. نزّل نسخة احتياطية الأول لو مش متأكد.',
+        'امسح كل حاجة'
+      );
+      if (!ok) return;
+      await db.wipe();
+      resetSeedFlag();
+      toast('اتمسحت كل البيانات');
+      location.hash = '#/dashboard';
+      location.reload();
+    };
+  },
+};
+
+
+/* ═══ js/app.js ═══ */
+/**
+ * نقطة البداية — التوجيه (router) وتشغيل الواجهة
+ */
+
+
+
+
+
+
+
+
+
+
+const ROUTES = {
+  '/dashboard': { title: 'لوحة التحكم', page: dashboard },
+  '/appointments': { title: 'المواعيد', page: appointmentsPage },
+  '/patients': { title: 'المرضى', page: patientsPage },
+  '/records': { title: 'السجلات الطبية', page: recordsPage },
+  '/doctors': { title: 'الأطباء', page: doctorsPage },
+  '/invoices': { title: 'الفواتير', page: invoicesPage },
+  '/reports': { title: 'التقارير', page: reportsPage },
+  '/settings': { title: 'الإعدادات', page: settingsPage },
+};
+
+/* ————————————————————————— التوجيه ————————————————————————— */
+
+/** بيقسم "#/patients/abc123" إلى ["/patients", "abc123"] */
+function parseHash() {
+  const raw = location.hash.replace(/^#/, '') || '/dashboard';
+  const parts = raw.split('/').filter(Boolean);
+  return { path: '/' + (parts[0] || 'dashboard'), param: parts[1] || null };
+}
+
+async function render() {
+  const { path, param } = parseHash();
+  const route = ROUTES[path] || ROUTES['/dashboard'];
+
+  $('#page-title').textContent = route.title;
+  $('#page-actions').innerHTML = '';
+  $('#view').innerHTML = '<div class="loading">جارِ التحميل…</div>';
+
+  $$('.nav__item').forEach((a) => {
+    a.classList.toggle('is-active', a.getAttribute('href') === '#' + path);
+  });
+
+  closeSidebar();
+  window.scrollTo(0, 0);
+
+  try {
+    await route.page.render($('#view'), { param, actions: $('#page-actions'), reload: render });
+  } catch (err) {
+    console.error(err);
+    $('#view').innerHTML = `<div class="empty"><div class="empty__icon">⚠️</div>
+      <h3>حصلت مشكلة في تحميل الصفحة</h3><p>${err.message}</p></div>`;
+  }
+}
+
+/* ————————————————————————— القائمة الجانبية على الموبايل ————————————————————————— */
+
+function openSidebar() {
+  $('#sidebar').classList.add('is-open');
+  $('#sidebar-scrim').classList.add('is-open');
+}
+function closeSidebar() {
+  $('#sidebar').classList.remove('is-open');
+  $('#sidebar-scrim').classList.remove('is-open');
+}
+
+/* ————————————————————————— الوضع الليلي ————————————————————————— */
+
+function applyTheme(mode) {
+  document.documentElement.dataset.theme = mode;
+  localStorage.setItem('clinicflow-theme', mode);
+  $('#theme-toggle').textContent = mode === 'dark' ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي';
+}
+
+/* ————————————————————————— التشغيل ————————————————————————— */
+
+async function boot() {
+  // لو المستخدم اختار وضع قبل كده نمشي عليه، وإلا نتبع إعداد الجهاز نفسه
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  applyTheme(localStorage.getItem('clinicflow-theme') || (prefersDark ? 'dark' : 'light'));
+
+  $('#theme-toggle').addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  $('#menu-btn').addEventListener('click', openSidebar);
+  $('#sidebar-scrim').addEventListener('click', closeSidebar);
+
+  window.addEventListener('hashchange', render);
+
+  try {
+    await ensureSeed();
+    const s = await settings.get();
+    $('#brand-clinic').textContent = s.clinicName;
+    document.title = `${s.clinicName} — ClinicFlow`;
+  } catch (err) {
+    console.error(err);
+    toast('مشكلة في فتح قاعدة البيانات — جرّب متصفح تاني', 'error');
+  }
+
+  await render();
+}
+
+boot();
+
+})();
+</script>
+</body>
+</html>
