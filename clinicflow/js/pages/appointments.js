@@ -126,14 +126,18 @@ export default {
     const el = (id) => view.querySelector('#' + id);
 
     const draw = async () => {
+      const listEl = el('list');
+      if (!listEl) return;
       el('date').value = date;
       el('day-title').textContent = `${fmtDay(date)} — ${fmtDate(date)}`;
 
       let rows = await appointments.detailed((a) => a.date === date);
+      // ممكن المستخدم يكون خرج من الصفحة والتحميل لسه شغال
+      if (!listEl.isConnected) return;
       if (statusFilter) rows = rows.filter((a) => a.status === statusFilter);
       el('count').textContent = `${rows.length} موعد`;
 
-      el('list').innerHTML = rows.length
+      listEl.innerHTML = rows.length
         ? `<div class="table-wrap"><table class="data">
             <thead><tr><th>الوقت</th><th>المريض</th><th>الطبيب</th><th>سبب الزيارة</th><th>الحالة</th><th></th></tr></thead>
             <tbody>${rows.map((a) => {

@@ -79,10 +79,13 @@ export default {
       <div id="out"></div>`;
 
     const draw = async () => {
+      const out = view.querySelector('#out');
       const s = await build(from, to);
+      // لو المستخدم خرج من الصفحة والحساب لسه شغال، مانكتبش في عنصر مبقاش موجود
+      if (!out || !out.isConnected) return s;
       const c = s.cfg.currency;
 
-      view.querySelector('#out').innerHTML = `
+      out.innerHTML = `
         <div class="grid grid--stats" style="margin-bottom:16px">
           <div class="stat"><div class="stat__icon" style="background:var(--info-soft)">📅</div>
             <div><div class="stat__num">${s.appointments}</div><div class="stat__label">مواعيد</div></div></div>

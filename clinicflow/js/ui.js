@@ -35,7 +35,10 @@ export function fmtTime(hhmm) {
 }
 
 export function fmtMoney(n, currency = 'ج.م') {
-  return `${(Number(n) || 0).toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ${currency}`;
+  // أرقام لاتينية (1، 2، 3) عشان تبقى زي التواريخ والأوقات في باقي التطبيق —
+  // 'ar-EG' لوحدها بتطلع أرقام هندية (١، ٢، ٣) وبتبقى متضاربة مع باقي الأرقام
+  const num = (Number(n) || 0).toLocaleString('ar-EG-u-nu-latn', { maximumFractionDigits: 2 });
+  return `${num} ${currency}`;
 }
 
 export function today() {

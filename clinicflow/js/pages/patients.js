@@ -223,10 +223,14 @@ export default {
       <div class="card"><div id="list"></div></div>`;
 
     const draw = async (q = '') => {
+      const listEl = view.querySelector('#list');
+      const countEl = view.querySelector('#count');
       const rows = await patients.search(q);
-      view.querySelector('#count').textContent = `${rows.length} مريض`;
+      // البحث بيتأخر شوية، فممكن يخلص بعد ما المستخدم يكون خرج من الصفحة
+      if (!listEl || !listEl.isConnected) return;
 
-      view.querySelector('#list').innerHTML = rows.length
+      countEl.textContent = `${rows.length} مريض`;
+      listEl.innerHTML = rows.length
         ? `<div class="table-wrap"><table class="data">
             <thead><tr><th>الاسم</th><th>التليفون</th><th>السن</th><th>فصيلة الدم</th><th></th></tr></thead>
             <tbody>${rows
