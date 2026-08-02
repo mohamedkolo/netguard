@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://mohamedkolo.github.io/netguard/sitemap.xml
