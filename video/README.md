@@ -1,54 +1,71 @@
-# Remotion video
+# فيديو ClinicFlow الترويجي
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+مشروع [Remotion](https://www.remotion.dev) بيولّد فيديو ترويجي لـ ClinicFlow —
+عربي بالكامل، من اليمين للشمال، بنفس ألوان وخط التطبيق.
 
-Welcome to your Remotion project!
+**المواصفات:** ١٩٢٠×١٠٨٠، ٣٠ إطار/ثانية، ١٢١٨ إطار (≈ ٤٠ ثانية)، من غير صوت.
 
-## Commands
+## التشغيل
 
-**Install Dependencies**
-
-```console
+```bash
 npm i
+npm run dev          # استوديو Remotion للمعاينة والتعديل الحي
 ```
 
-**Start Preview**
+## الرندر
 
-```console
-npm run dev
+```bash
+npx remotion render ClinicFlowPromo out/clinicflow-promo.mp4
 ```
 
-**Render video**
+مجلد `out/` مستثنى من git، فالفيديو الناتج مش بيتحفظ في المستودع — تعمله وقت
+ما تحتاجه.
 
-```console
-npx remotion render
+**لو الجهاز مش بيقدر ينزّل متصفح Remotion** (شبكة مقفولة مثلًا)، وجّهه لمتصفح
+موجود عندك:
+
+```bash
+npx remotion render ClinicFlowPromo out/clinicflow-promo.mp4 \
+  --browser-executable=/المسار/إلى/chrome
 ```
 
-**Upgrade Remotion**
+## المشاهد
 
-```console
-npx remotion upgrade
+| # | المشهد | الملف | مدته |
+|---|---|---|---|
+| ١ | العلامة والاسم | `scenes/Intro.tsx` | ١٢٠ إطار |
+| ٢ | من غير سيرفر ولا تنصيب ولا اشتراك | `scenes/Pitch.tsx` | ١٤٠ |
+| ٣ | لوحة التحكم شغّالة | `scenes/Dashboard.tsx` | ٢٤٠ |
+| ٤ | الأقسام الثمانية | `scenes/Features.tsx` | ٢٠٥ |
+| ٥ | الطباعة والعربي المظبوط | `scenes/Printing.tsx` | ٢٢٥ |
+| ٦ | الخصوصية | `scenes/Privacy.tsx` | ١٨٠ |
+| ٧ | ابدأ دلوقتي | `scenes/Outro.tsx` | ١٨٠ |
+
+المشاهد بتتركّب في `Promo.tsx`، وكل مشهد بيتداخل مع اللي بعده ١٢ إطار عشان
+الانتقال يبقى تلاشي ناعم. تغيير المدد أو الترتيب من مصفوفة `SCENES` هناك،
+والمدة الكلية بتتحسب لوحدها.
+
+## شكل الكود
+
+```
+src/clinicflow/
+├── Promo.tsx        تركيب المشاهد وحساب المدة الكلية
+├── theme.ts         الألوان (منقولة من الوضع الليلي في css/styles.css) + تحويل الأرقام لعربية
+├── fonts.ts         تحميل خط Cairo من public/fonts
+├── motion.tsx       أدوات الحركة: Reveal و Scene و useEnter و useCountUp
+├── Backdrop.tsx     الخلفية المشتركة تحت كل المشاهد
+├── Brand.tsx        علامة ClinicFlow
+├── Icon.tsx         أيقونات SVG مرسومة بالإيد
+├── AppWindow.tsx    نسخة وهمية من واجهة التطبيق
+└── scenes/          مشهد لكل ملف
 ```
 
-## Docs
+## ملاحظات
 
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+- **الخط:** ملفات Cairo متحمّلة في `public/fonts` (ملفين variable، عربي
+  ولاتيني) عشان الرندر يشتغل من غير نت ويطلع نفس النتيجة كل مرة.
+- **الأيقونات:** كلها SVG مرسومة في `Icon.tsx` مش إيموچي — الإيموچي شكله
+  بيختلف من نظام لنظام وساعات مش بيتظبط في الرندر.
+- **الأرقام:** دالة `ar()` في `theme.ts` بتحوّل الأرقام لعربية-هندية زي ما
+  التطبيق بيعرضها بلغة `ar-EG`.
+- **البيانات في الفيديو تمثيلية** (أسماء مرضى وأرقام) — مش من قاعدة بيانات حقيقية.
